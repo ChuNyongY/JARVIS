@@ -563,6 +563,7 @@ from .voice_adapters import (
     FasterWhisperSpeechToText,
     OpenWakeWordDetector,
     PcmEnergyVad,
+    RepCnnWakeWordDetector,
     SoundDeviceFrameSource,
 )
 from .voice_command import (
@@ -881,6 +882,7 @@ __all__ = [
     "PolicyEngine",
     "PortableExecutableLease",
     "PcmEnergyVad",
+    "RepCnnWakeWordDetector",
     "PowerShellReadOnlyExecutor",
     "PowerShellAuthenticodeVerifier",
     "ProcessLaunchExecutor",

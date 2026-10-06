@@ -441,3 +441,9 @@ recovery는 파일을 이동하거나 삭제하지 않고, 관찰된 상태에 �
 - 전체 회귀는 766 passed, 3 skipped, Ruff clean, mypy strict 123 source files다.
 - 후속 wake-word corpus 하네스와 CLI를 추가한 뒤 전체 회귀는 783 passed, 3 skipped,
   Ruff clean, mypy strict 124 source files다. 실제 동의 corpus가 없으므로 FAR/FRR 측정값은 아직 없다.
+- `wakeword-forge`와 공개 `okay-hermes` ONNX를 감사했다. 실제 그래프는 가변 시간축
+  `float32[batch,time]` 입력이지만 3초 창을 권장하고 현재 openWakeWord와 계약이 달라 직접 교체하지
+  않았다. 고정 SHA-256·크기·입출력 검증, 3초 ring buffer, 400 ms hop과 reset을 갖춘 실험용
+  `RepCnnWakeWordDetector`를 추가했다. 공개 예제 무음 smoke는 점수 `0.624035120`을 반환했으므로
+  0.5 하한만으로 모델을 채택할 수 없고 실제 동의 corpus의 모델별 FAR/FRR 보정이 필요하다.
+- 이 단계의 전체 회귀는 792 passed, 3 skipped, Ruff clean, mypy strict 124 source files다.

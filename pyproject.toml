@@ -26,6 +26,7 @@ dev = [
 voice = [
   "av>=18.1,<19; platform_system == 'Windows'",
   "numpy>=1.26,<3",
+  "onnxruntime>=1.23,<2; platform_system == 'Windows'",
   "openwakeword>=0.5.1,<0.6",
   "scikit-learn>=1.7,<1.8; platform_system == 'Windows'",
   "faster-whisper>=1.1,<2",

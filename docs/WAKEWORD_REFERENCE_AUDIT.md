@@ -53,6 +53,32 @@ openWakeWord 공식 문서는 맞춤 모델에 최소 수천 개의 양성 예�
    측정한다.
 6. 목표 기준은 실제 측정 전에 고정한다. 현재는 측정값이 없으므로 개선 비율을 주장하지 않는다.
 
+## `wakeword-forge` 실험 후보 감사
+
+`wakeword-forge` v0.1.3은 Apache-2.0으로 공개되어 있고, WavLM 교사 모델을 이용해 약 217 KiB
+RepCNN ONNX를 만드는 로컬 학습 흐름을 제공한다. 문서가 제시하는 시작 데이터는 목표 호출어 10개,
+비호출어 5개, 배경 150개, 부분 발화 100개지만 공개된 교차 화자 한국어 `Jarvis` 성능 자료는 없다.
+따라서 이 숫자는 제품 성능을 보장하는 최소 기준으로 사용하지 않는다.
+
+공개 `okay-hermes` 예제의 `wakeword_v2.onnx`를 제품 밖 임시 폴더에서 검사했다. 파일 SHA-256은
+`647fee171d7d98fa1672ec26f65f68a135471aea34bbdac4ede34693b89a68e1`이고 실제 ONNX Runtime
+메타데이터는 `waveform: float32[batch,time]` 입력 하나와 `score: float32[batch]` 출력 하나다.
+즉, 시간 축은 실제 그래프에서 가변 길이다. 그러나 예제의 학습·기본 사용 계약은 16 kHz 3초,
+48,000표본을 권장한다. 예제 임계값 `0.697355628`도 `okay-hermes` 자료일 뿐 한국어 `Jarvis`의
+채택 근거가 아니다.
+
+현재 openWakeWord 어댑터는 80 ms `int16` 프레임과 별도 특징 모델을 사용하므로 이 RepCNN을 바로
+교체할 수 없다. 별도의 실험 어댑터를 추가해 3초 창을 누적하고 400 ms마다 추론하게 했으며, 로컬
+ONNX의 크기·SHA-256·입출력 계약을 먼저 검증한다. 공개 예제에 무음만 공급한 연결 시험은 38번째
+80 ms 프레임에서 첫 추론, 이후 5프레임마다 추론했고 점수는 매번 `0.624035120`이었다. 두 번의
+추론을 포함한 43프레임 처리 시간은 이 PC CPU에서 약 54.9 ms였다. 이는 연결·형식 확인일 뿐 정확도,
+지연 상한 또는 한국어 성능 측정값이 아니다. 특히 일반 하한 0.5만 적용하면 이 예제의 무음 점수가
+임계값을 넘으므로 모델별 임계값을 실제 FAR/FRR 자료로 따로 고정해야 한다.
+
+결론은 **제품 기본 모델로 채택하지 않고 실험 후보로만 유지**하는 것이다. 사용자의 동의를 받은
+한국어 목표·비호출어 corpus가 준비되면 현재 영어 모델과 같은 평가 하네스에서 화자·거리·소음별
+FAR/FRR을 비교하고, 그 결과가 사전에 정한 기준을 만족할 때만 제품 경로 연결을 검토한다.
+
 ## 출처
 
 - [GitHub jarvis-ai 주제](https://github.com/topics/jarvis-ai)
@@ -60,4 +86,5 @@ openWakeWord 공식 문서는 맞춤 모델에 최소 수천 개의 양성 예�
 - [공식 hey_jarvis 모델 설명](https://github.com/dscripka/openWakeWord/blob/main/docs/models/hey_jarvis.md)
 - [Porcupine 모델 API와 지원 언어](https://picovoice.ai/docs/model-api/porcupine/)
 - [Vosk 공식 사이트](https://alphacephei.com/vosk/)
+- [`wakeword-forge` 공개 저장소](https://github.com/H-Ali13381/wakeword-forge)
 

@@ -1426,3 +1426,21 @@ NIM 결과는 그대로 반영하지 않았다. 감사 과정에서 다음 문�
   재사용하고 오류를 보수적 adverse outcome으로 세는 typed report, CLI와 회귀시험을 구현·감사했다.
 - 전체 회귀는 783 passed, 3 skipped, Ruff clean, mypy strict 124 source files다. 실제 동의 corpus가
   없으므로 성능 수치를 생성하지 않았다.
+
+## 2026-10-07 `wakeword-forge` 후보·RepCNN 어댑터 초안 감사
+
+- 공개 저장소와 예제 ONNX에서 확인한 라이선스, 데이터 제안량, 실제 입출력 메타데이터, 해시와
+  현재 파이프라인 계약만 NIM `z-ai/glm-5.3-flash`에 제공했다. API key, 사용자 음성, 장치명과
+  개인 식별정보는 보내지 않았다.
+- NIM의 후보 문서 초안은 성능 수치를 발명하지 않고 실험 후보 보류 결론을 냈다. 다만 `음성 5`라는
+  표현은 음성 데이터와 비호출어(negative)를 혼동할 수 있어 고쳤고, 실제 무음 연결 시험과 모델별
+  임계값 위험은 Codex가 ONNX Runtime으로 독립 확인해 추가했다.
+- NIM 코드 초안은 누적 창·간격 추론·해시 고정 원칙은 유효했지만 기존 `AudioFrame` 대신 `bytes`를
+  받아 제품 계약과 맞지 않았다. 또한 `resolve()` 뒤 symlink를 검사해 검사가 무력화됐고,
+  `get_outputs()`를 선언하고도 입출력 형식을 검증하지 않았으며, 시험에서 byte 길이를 sample 수로
+  계산했다. 이 코드는 그대로 채택하지 않았다.
+- Codex가 기존 detector/evaluator 계약에 맞춰 로컬 모델 byte를 크기 제한 안에서 읽고 SHA-256을
+  검증한 뒤 그 동일 byte를 CPU ONNX Runtime에 전달하도록 구현했다. 3초 ring buffer, 400 ms hop,
+  strict I/O metadata, invalid score fail-closed와 reset 회귀시험을 추가했다. 공개 모델은 임시 폴더에
+  유지했으며 제품 기본 모델이나 배포 산출물에는 넣지 않았다.
+- 전체 회귀는 792 passed, 3 skipped, Ruff clean, mypy strict 124 source files다.

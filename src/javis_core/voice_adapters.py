@@ -4,8 +4,9 @@ import math
 import queue
 import sys
 from array import array
-from collections.abc import Buffer, Callable, Iterable, Mapping
+from collections.abc import Buffer, Callable, Iterable, Mapping, Sequence
 from contextlib import suppress
+from hashlib import sha256
 from importlib import import_module
 from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
@@ -22,6 +23,24 @@ class WakeModel(Protocol):
     def predict(self, audio: object) -> Mapping[str, object]: ...
 
     def reset(self) -> None: ...
+
+
+class OnnxNodeLike(Protocol):
+    name: str
+    shape: Sequence[object]
+    type: str
+
+
+class OnnxSessionLike(Protocol):
+    def get_inputs(self) -> Sequence[OnnxNodeLike]: ...
+
+    def get_outputs(self) -> Sequence[OnnxNodeLike]: ...
+
+    def run(
+        self,
+        output_names: list[str] | None,
+        input_feed: Mapping[str, object],
+    ) -> Sequence[object]: ...
 
 
 class WhisperSegment(Protocol):
@@ -146,6 +165,163 @@ class OpenWakeWordDetector:
 
     def reset(self) -> None:
         self._model.reset()
+
+
+def _repcnn_waveform(pcm_s16le: bytes) -> object:
+    try:
+        np = import_module("numpy")
+    except ImportError as error:
+        raise RuntimeError("RepCNN wake-word adapter requires numpy") from error
+    waveform = np.frombuffer(pcm_s16le, dtype=np.int16).astype(np.float32)
+    waveform /= 32768.0
+    return waveform.reshape(1, -1)
+
+
+def _repcnn_score(output: object) -> float:
+    try:
+        np = import_module("numpy")
+    except ImportError as error:
+        raise RuntimeError("RepCNN wake-word adapter requires numpy") from error
+    values = np.asarray(output)
+    if values.dtype != np.float32 or values.ndim != 1 or values.size != 1:
+        raise ValueError("RepCNN output must be one float32 score")
+    return float(values[0])
+
+
+class RepCnnWakeWordDetector:
+    """Experimental fixed-window adapter for a pinned local RepCNN ONNX model."""
+
+    def __init__(
+        self,
+        session: OnnxSessionLike,
+        *,
+        window_samples: int = 48_000,
+        hop_samples: int = 6_400,
+        waveform_converter: Callable[[bytes], object] = _repcnn_waveform,
+        score_converter: Callable[[object], float] = _repcnn_score,
+    ) -> None:
+        if window_samples < 1 or not 1 <= hop_samples <= window_samples:
+            raise ValueError("invalid RepCNN window configuration")
+        inputs = tuple(session.get_inputs())
+        outputs = tuple(session.get_outputs())
+        if len(inputs) != 1 or len(outputs) != 1:
+            raise ValueError("RepCNN model must have one input and one output")
+        input_node, output_node = inputs[0], outputs[0]
+        if (
+            input_node.type != "tensor(float)"
+            or len(input_node.shape) != 2
+            or output_node.type != "tensor(float)"
+            or len(output_node.shape) != 1
+            or not input_node.name
+            or not output_node.name
+        ):
+            raise ValueError("RepCNN model input/output contract is incompatible")
+        fixed_time = input_node.shape[1]
+        input_batch = input_node.shape[0]
+        output_batch = output_node.shape[0]
+        if (
+            (isinstance(input_batch, int) and input_batch != 1)
+            or (isinstance(output_batch, int) and output_batch != 1)
+        ):
+            raise ValueError("RepCNN model batch size is incompatible")
+        if isinstance(fixed_time, int) and fixed_time != window_samples:
+            raise ValueError("RepCNN fixed input length does not match window")
+        self._session = session
+        self._input_name = input_node.name
+        self._output_name = output_node.name
+        self._window_bytes = window_samples * 2
+        self._hop_samples = hop_samples
+        self._waveform_converter = waveform_converter
+        self._score_converter = score_converter
+        self._buffer = bytearray()
+        self._primed = False
+        self._samples_since_inference = 0
+
+    @classmethod
+    def from_local_model(
+        cls,
+        model_path: Path,
+        expected_sha256: str,
+        *,
+        window_samples: int = 48_000,
+        hop_samples: int = 6_400,
+        max_model_bytes: int = 16 * 1024 * 1024,
+    ) -> RepCnnWakeWordDetector:
+        if (
+            len(expected_sha256) != 64
+            or any(character not in "0123456789abcdef" for character in expected_sha256)
+            or max_model_bytes < 1
+        ):
+            raise ValueError("invalid RepCNN model integrity configuration")
+        if (
+            model_path.is_symlink()
+            or model_path.suffix.lower() != ".onnx"
+            or not model_path.is_file()
+        ):
+            raise ValueError("RepCNN model must be a local non-symlink ONNX file")
+        try:
+            with model_path.open("rb") as stream:
+                model_bytes = stream.read(max_model_bytes + 1)
+        except OSError as error:
+            raise ValueError("RepCNN model could not be read") from error
+        if len(model_bytes) > max_model_bytes:
+            raise ValueError("RepCNN model exceeded size limit")
+        if sha256(model_bytes).hexdigest() != expected_sha256:
+            raise ValueError("RepCNN model integrity verification failed")
+        try:
+            InferenceSession = import_module("onnxruntime").InferenceSession
+            session = InferenceSession(
+                model_bytes,
+                providers=["CPUExecutionProvider"],
+            )
+        except Exception as error:
+            raise RuntimeError("local RepCNN model initialization failed") from error
+        return cls(
+            session,
+            window_samples=window_samples,
+            hop_samples=hop_samples,
+        )
+
+    def score(self, frame: AudioFrame) -> float:
+        if (
+            frame.sample_rate != 16_000
+            or frame.channels != 1
+            or len(frame.pcm_s16le) % 2
+        ):
+            raise ValueError("RepCNN requires mono 16 kHz signed 16-bit PCM")
+        samples = len(frame.pcm_s16le) // 2
+        self._buffer.extend(frame.pcm_s16le)
+        if len(self._buffer) > self._window_bytes:
+            del self._buffer[: len(self._buffer) - self._window_bytes]
+        if len(self._buffer) < self._window_bytes:
+            return 0.0
+        if not self._primed:
+            self._primed = True
+            self._samples_since_inference = 0
+        else:
+            self._samples_since_inference += samples
+            if self._samples_since_inference < self._hop_samples:
+                return 0.0
+            self._samples_since_inference %= self._hop_samples
+        waveform = self._waveform_converter(bytes(self._buffer))
+        outputs = self._session.run(
+            [self._output_name],
+            {self._input_name: waveform},
+        )
+        if len(outputs) != 1:
+            return 0.0
+        try:
+            score = self._score_converter(outputs[0])
+        except (TypeError, ValueError, OverflowError):
+            return 0.0
+        if not math.isfinite(score):
+            return 0.0
+        return min(1.0, max(0.0, score))
+
+    def reset(self) -> None:
+        self._buffer.clear()
+        self._primed = False
+        self._samples_since_inference = 0
 
 
 class PcmEnergyVad:

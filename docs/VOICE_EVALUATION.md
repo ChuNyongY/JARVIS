@@ -72,6 +72,12 @@ prediction buffer를 `reset()`해 이전 음성이 다음 표본에 섞이지 �
 이 값은 제공된 corpus와 마이크·거리·소음 조건에만 해당한다. 실제 동의 corpus 없이 합성 단위시험
 결과를 제품 정확도로 주장하지 않는다.
 
+`RepCnnWakeWordDetector`는 `wakeword-forge` 계열 ONNX를 비교하기 위한 실험 어댑터다. 16 kHz
+mono PCM의 최근 48,000표본(3초)을 보관하고 창이 찬 직후 한 번, 그 뒤 6,400표본(400 ms)마다
+추론한다. 모델은 네트워크에서 받지 않으며 호출자가 고정한 SHA-256, 16 MiB 크기 상한,
+`float32[batch,time] -> float32[batch]` 계약을 모두 통과해야 한다. 현재 제품 기본 호출어 경로나
+CLI에는 연결하지 않았으며, Python 평가 API에 주입해 후보 모델을 격리 비교하는 용도다.
+
 ## Wake-word model bundle
 
 `models/openwakeword/manifest.json`은 공식 openWakeWord v0.5.1의 ONNX wake-word와 feature model
