@@ -1,0 +1,60 @@
+# 한국어 음성 평가 계약
+
+음성 평가 하네스는 로컬 corpus 파일만 읽으며 마이크를 열거나 네트워크를 사용하지 않는다.
+실제 녹음은 참가자의 별도 동의 절차와 보관 정책이 마련된 환경에서 외부 도구로 수행해야 한다.
+
+별도의 `probe-microphones` 명령은 장치를 열지 않고 PortAudio의 device metadata와
+`check_input_settings`만 조회한다. 반환값은 index, 입력 channel 수, 기본 sample rate, 기본 장치
+여부, 16 kHz mono int16 호환 여부뿐이다. 장치명과 host API 이름은 반환하지 않는다.
+
+```powershell
+.\.venv\Scripts\python.exe -m javis_core.cli probe-microphones
+```
+
+## Manifest와 입력 검증
+
+- manifest는 UTF-8 JSON이며 최대 1 MiB, 최대 1,000개 sample로 제한한다.
+- 각 sample은 고유한 `sample_id`, corpus root 기준 상대 POSIX WAV 경로, WAV SHA-256,
+  한국어 reference text와 그 UTF-8 SHA-256, 비어 있지 않은 `consent_record_id`를 가진다.
+- 절대 경로, `..`, Windows drive/역슬래시, symlink component, root 이탈을 거부한다.
+- WAV는 mono, 16 kHz, uncompressed signed 16-bit PCM이어야 한다. 기본 한도는 sample당 2 MiB,
+  corpus 총 100 MiB, sample당 30초다.
+- 모든 sample의 경로·크기·hash·format·duration을 먼저 검증한다. 하나라도 실패하면 STT를 한 번도
+  호출하지 않는다.
+
+## Metric 정의
+
+reference와 hypothesis는 Unicode NFKC 후 모든 whitespace를 단일 space로 정규화한다. CER은
+space를 제외한 Unicode code point sequence의 Levenshtein distance 합을 reference character
+수 합으로 나눈 micro average다. WER은 공백 분리 token sequence의 edit distance 합을 reference
+word 수 합으로 나눈 micro average다.
+
+STT inference 예외는 해당 sample의 빈 hypothesis로 처리해 CER/WER에서 reference 전체 삭제로
+벌점을 주고 `STT_INFERENCE_FAILED`를 기록한다. 따라서 실패 sample을 분모에서 제거해 성능을
+부풀리지 않는다.
+
+## 개인정보 경계
+
+평가 보고서에는 audio bytes, 파일 경로, reference/hypothesis 원문, consent record ID를 넣지
+않는다. sample ID, 정규화 transcript SHA-256, 길이, edit distance, latency, error code만 기록한다.
+SHA-256은 짧은 발화를 사전 공격으로 복원하지 못하게 보장하지 않으므로 보고서도 민감 연구
+데이터로 취급해야 한다. `consent_record_id`는 실제 신원 정보가 아닌 외부 동의 기록의 opaque
+reference만 사용한다.
+
+이 하네스의 테스트는 injected STT와 합성 무음 WAV를 사용한다. 실제 한국어 화자 corpus, 장치별
+잡음, wake-word 정확도, faster-whisper 모델 품질은 아직 측정하지 않았다.
+
+## Wake-word model bundle
+
+`models/openwakeword/manifest.json`은 공식 openWakeWord v0.5.1의 ONNX wake-word와 feature model
+두 개의 상대 경로·SHA-256·prediction key를 고정한다. loader는 중복 key, 추가 field, 절대·상위
+경로, symlink, root 이탈, 크기 초과, hash 불일치를 거부하고 URL이나 model name download를
+지원하지 않는다. detector 생성 직전 세 hash를 다시 확인한다.
+
+## STT model bundle
+
+`models/faster-whisper-tiny/manifest.json`은 `Systran/faster-whisper-tiny`의 immutable commit과
+`config.json`, `model.bin`, `tokenizer.json`, `vocabulary.txt`의 byte size·SHA-256을 고정한다.
+loader는 정확한 filename과 네 파일만을 계약으로 검증하며 runtime에는 검증된 local directory와
+`local_files_only=True`를 전달한다. 이 tiny multilingual 모델은 runtime integration용 기준선이며
+졸업논문의 한국어 정확도 결론에는 실제 동의 corpus로 측정한 CER/WER가 필요하다.

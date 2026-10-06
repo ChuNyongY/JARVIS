@@ -1,0 +1,22 @@
+{
+  "schema_version": "1.0",
+  "app_registry": "config/apps.json",
+  "hello_manifest": "config/windows_hello_helper.json",
+  "wakeword_manifest": "models/openwakeword/manifest.json",
+  "stt_manifest": "models/faster-whisper-tiny/manifest.json",
+  "browser_allowed_hosts": [
+    "developer.nvidia.com",
+    "docs.python.org",
+    "github.com",
+    "learn.microsoft.com",
+    "www.google.com"
+  ],
+  "nim_model": "z-ai/glm-5.3-flash",
+  "wake_threshold": 0.5,
+  "vad_rms_threshold": 500,
+  "end_silence_frames": 5,
+  "max_capture_frames": 1500,
+  "microphone_frame_ms": 80,
+  "microphone_queue_capacity": 32,
+  "hud_poll_interval_ms": 250
+}

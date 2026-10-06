@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "source_repository": "Systran/faster-whisper-tiny",
+  "source_revision": "d90ca5fe260221311c53c58e660288d3deb8d356",
+  "files": {
+    "config.json": {
+      "path": "config.json",
+      "sha256": "a73a28cdfe1c43ccc7202fa333d1f89c202477271407ae9a7f19afa52039cac8",
+      "size": 2249
+    },
+    "model.bin": {
+      "path": "model.bin",
+      "sha256": "dcb76c6586fc06cbdac6dd21f14cfd129cc4cdd9dce19bf4ffa62e59cbe6e6d1",
+      "size": 75538270
+    },
+    "tokenizer.json": {
+      "path": "tokenizer.json",
+      "sha256": "fb7b63191e9bb045082c79fd742a3106a12c99513ab30df4a0d47fa6cb6fd0ab",
+      "size": 2203239
+    },
+    "vocabulary.txt": {
+      "path": "vocabulary.txt",
+      "sha256": "34ce3fe1c5041027b3f8d42912270993f986dbc4bb34cf27f951e34a1e453913",
+      "size": 459861
+    }
+  }
+}

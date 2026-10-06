@@ -1,0 +1,38 @@
+[
+  {
+    "schema_version": "1.0",
+    "scenario_id": "S08",
+    "vm_provider": "replace-with-provider-id",
+    "base_snapshot_id": "replace-with-immutable-snapshot-id",
+    "guest_machine_id": "replace-with-guest-machine-id",
+    "capability_id": "file.delete.permanent",
+    "expected_outcome": "EXACT_FILE_ABSENT_AND_SNAPSHOT_RESTORED"
+  },
+  {
+    "schema_version": "1.0",
+    "scenario_id": "S09",
+    "vm_provider": "replace-with-provider-id",
+    "base_snapshot_id": "replace-with-immutable-snapshot-id",
+    "guest_machine_id": "replace-with-guest-machine-id",
+    "capability_id": "system.shutdown",
+    "expected_outcome": "VM_SHUTDOWN_HOST_RUNNING_AND_SNAPSHOT_RESTORED"
+  },
+  {
+    "schema_version": "1.0",
+    "scenario_id": "S10",
+    "vm_provider": "replace-with-provider-id",
+    "base_snapshot_id": "replace-with-immutable-snapshot-id",
+    "guest_machine_id": "replace-with-guest-machine-id",
+    "capability_id": "system.reset.commit",
+    "expected_outcome": "MANUAL_RESET_BOUNDARY_AND_SNAPSHOT_RESTORED"
+  },
+  {
+    "schema_version": "1.0",
+    "scenario_id": "S12",
+    "vm_provider": "replace-with-provider-id",
+    "base_snapshot_id": "replace-with-immutable-snapshot-id",
+    "guest_machine_id": "replace-with-guest-machine-id",
+    "capability_id": "package.install",
+    "expected_outcome": "VERIFIED_PACKAGE_INSTALLED_AND_SNAPSHOT_RESTORED"
+  }
+]

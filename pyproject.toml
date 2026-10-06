@@ -1,0 +1,58 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "javis-pc-agent"
+version = "0.1.0"
+description = "Safety execution-control core for a Windows PC agent"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "pydantic>=2.8,<3",
+  "pywin32>=311; platform_system == 'Windows'",
+]
+
+[project.scripts]
+javis = "javis_core.cli:entrypoint"
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3,<9",
+  "pytest-cov>=5,<7",
+  "ruff>=0.6,<1",
+  "mypy>=1.11,<2",
+]
+voice = [
+  "av>=18.1,<19; platform_system == 'Windows'",
+  "numpy>=1.26,<3",
+  "openwakeword>=0.5.1,<0.6",
+  "scikit-learn>=1.7,<1.8; platform_system == 'Windows'",
+  "faster-whisper>=1.1,<2",
+  "sounddevice>=0.5,<1",
+  "scipy>=1.16,<1.17; platform_system == 'Windows'",
+]
+uia = ["pywinauto>=0.6.9,<1"]
+trash = ["send2trash>=1.8,<2"]
+audio-control = ["pycaw>=20251023,<20270000"]
+packaging = ["pyinstaller==6.22.3"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/javis_core"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["build", "dist", ".wheel-build-*", ".wheel-install-*"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]

@@ -1,0 +1,28 @@
+{
+  "schema_version": "1.1",
+  "host_executable": "C:\\Program Files\\dotnet\\dotnet.exe",
+  "host_sha256": "d0e0202bae97952993a6cb1cfe8dc1d89f5f9007406499b111bd2484eeb6f46d",
+  "entrypoint": "native/WindowsHelloHelper/publish-fdd/Javis.WindowsHelloHelper.dll",
+  "files": [
+    {
+      "path": "native/WindowsHelloHelper/publish-fdd/Javis.WindowsHelloHelper.deps.json",
+      "sha256": "fc18370d2d994d4c9023e8014d5d850adc6921980ff6e48cf72b83da823a5867"
+    },
+    {
+      "path": "native/WindowsHelloHelper/publish-fdd/Javis.WindowsHelloHelper.dll",
+      "sha256": "440c4c20f90392c5111c915f87b2417d8385ae8ac095811ddcc67f8e800202db"
+    },
+    {
+      "path": "native/WindowsHelloHelper/publish-fdd/Javis.WindowsHelloHelper.runtimeconfig.json",
+      "sha256": "b418946c10f1d0c722863174e67c2353db214d7f141ecc57ff3c2c3cf4a5407d"
+    },
+    {
+      "path": "native/WindowsHelloHelper/publish-fdd/Microsoft.Windows.SDK.NET.dll",
+      "sha256": "2891aee0893bc66ca2d9d781f1ea84017bbb7d80700e31fb6e8c0bc48490fa09"
+    },
+    {
+      "path": "native/WindowsHelloHelper/publish-fdd/WinRT.Runtime.dll",
+      "sha256": "bcf3a14e8712a90837fc5c0d8c8a24696af2bd7f74e9767597ec81ededfb23db"
+    }
+  ]
+}

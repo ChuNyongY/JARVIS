@@ -1,0 +1,54 @@
+{
+  "schema_version": "1.0",
+  "apps": [
+    {
+      "app_id": "chrome",
+      "executable": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "publisher": "CN=Google LLC, O=Google LLC, L=Mountain View, S=California, C=US, SERIALNUMBER=3582691, OID.2.5.4.15=Private Organization, OID.1.3.6.1.4.1.311.60.2.1.2=Delaware, OID.1.3.6.1.4.1.311.60.2.1.3=US",
+      "sha256": "6849d2982038de9f9489a7b3858f3b785b7fec06a842c93c517281d21995c8ca",
+      "launch_argument": "--new-window",
+      "single_instance_handoff": true,
+      "window_class": "Chrome_WidgetWin_1"
+    },
+    {
+      "app_id": "edge",
+      "document_launch_mode": "browser-new-window",
+      "executable": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+      "publisher": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "sha256": "39966f2799d3503e74871c945ba1c4877f38426d1c28756ab1545ad7c3de8907",
+      "launch_argument": "--new-window",
+      "single_instance_handoff": true,
+      "window_class": "Chrome_WidgetWin_1"
+    },
+    {
+      "app_id": "explorer",
+      "executable": "C:\\Windows\\explorer.exe",
+      "publisher": "CN=Microsoft Windows, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "sha256": "87811a107eed62900b230c49a252170d6a7307e94a08307ce972f9b9b8155d54",
+      "single_instance_handoff": true,
+      "window_class": "CabinetWClass"
+    },
+    {
+      "app_id": "notepad",
+      "executable": "C:\\WINDOWS\\System32\\notepad.exe",
+      "publisher": "CN=Microsoft Windows, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "runtime_executable": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsNotepad_11.2607.14.0_x64__8wekyb3d8bbwe\\Notepad\\Notepad.exe",
+      "runtime_publisher": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "runtime_sha256": "03745e9e21684c0e6d9fdc50d91caa0935f4baf50f626c11987ab7d6991d58d1",
+      "sha256": "468ffe129c395abf6b21a09efdf261910a95fb98aa982ead73caa7b2b684577e"
+    },
+    {
+      "app_id": "settings",
+      "direct_launch": false,
+      "executable": "C:\\Windows\\ImmersiveControlPanel\\SystemSettings.exe",
+      "publisher": "CN=Microsoft Windows, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "sha256": "11382f7efac4978063f568f06fe90af38f136fbe975cce39d13667bd288b71c9"
+    },
+    {
+      "app_id": "terminal",
+      "executable": "C:\\Program Files\\WindowsApps\\Microsoft.WindowsTerminal_1.24.12741.0_x64__8wekyb3d8bbwe\\WindowsTerminal.exe",
+      "publisher": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "sha256": "4ad317d9dacedca1e68dcc2405d6d364a20599b646b8205feae829cf18ef4958"
+    }
+  ]
+}
