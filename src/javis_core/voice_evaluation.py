@@ -8,6 +8,7 @@ import unicodedata
 import wave
 from collections.abc import Callable, Sequence
 from pathlib import Path, PurePosixPath
+from typing import Protocol
 
 from pydantic import Field, TypeAdapter, field_validator, model_validator
 
@@ -17,6 +18,14 @@ from .voice import AudioFrame, SpeechToText
 
 class VoiceCorpusError(ValueError):
     """Raised before inference when corpus inputs are not trustworthy."""
+
+
+class AudioFixtureReference(Protocol):
+    @property
+    def audio_file(self) -> str: ...
+
+    @property
+    def audio_sha256(self) -> str: ...
 
 
 class VoiceCorpusSample(FrozenModel):
@@ -208,12 +217,38 @@ def _validate_all_fixtures(
     max_duration_seconds: float,
     frame_ms: int,
 ) -> tuple[tuple[VoiceCorpusSample, tuple[AudioFrame, ...]], ...]:
+    loaded = load_audio_fixtures(
+        manifest.samples,
+        corpus_root,
+        max_sample_bytes=max_sample_bytes,
+        max_total_bytes=max_total_bytes,
+        max_duration_seconds=max_duration_seconds,
+        frame_ms=frame_ms,
+    )
+    return tuple(zip(manifest.samples, loaded, strict=True))
+
+
+def load_audio_fixtures(
+    samples: Sequence[AudioFixtureReference],
+    corpus_root: Path,
+    *,
+    max_sample_bytes: int = 2 * 1024 * 1024,
+    max_total_bytes: int = 100 * 1024 * 1024,
+    max_duration_seconds: float = 30.0,
+    frame_ms: int = 80,
+) -> tuple[tuple[AudioFrame, ...], ...]:
+    """Validate every local WAV before returning any inference input."""
+
+    if min(max_sample_bytes, max_total_bytes) < 1 or max_duration_seconds <= 0:
+        raise ValueError("corpus bounds must be positive")
+    if frame_ms < 10 or 16_000 * frame_ms % 1000:
+        raise ValueError("invalid frame duration")
     if corpus_root.is_symlink() or not corpus_root.is_dir():
         raise VoiceCorpusError("corpus root must be a regular non-symlink directory")
     resolved_root = corpus_root.resolve(strict=True)
     total_bytes = 0
-    fixtures: list[tuple[VoiceCorpusSample, tuple[AudioFrame, ...]]] = []
-    for sample in manifest.samples:
+    fixtures: list[tuple[AudioFrame, ...]] = []
+    for sample in samples:
         relative = PurePosixPath(sample.audio_file)
         candidate = resolved_root.joinpath(*relative.parts)
         _reject_symlink_components(resolved_root, candidate)
@@ -233,13 +268,10 @@ def _validate_all_fixtures(
         if len(raw) != size or hashlib.sha256(raw).hexdigest() != sample.audio_sha256:
             raise VoiceCorpusError("audio fixture hash mismatch")
         fixtures.append(
-            (
-                sample,
-                _decode_pcm_wav(
-                    raw,
-                    max_duration_seconds=max_duration_seconds,
-                    frame_ms=frame_ms,
-                ),
+            _decode_pcm_wav(
+                raw,
+                max_duration_seconds=max_duration_seconds,
+                frame_ms=frame_ms,
             )
         )
     return tuple(fixtures)

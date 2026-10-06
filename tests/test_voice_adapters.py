@@ -20,10 +20,14 @@ class WakeModel:
     def __init__(self, prediction: object) -> None:
         self.prediction = prediction
         self.inputs: list[object] = []
+        self.reset_calls = 0
 
     def predict(self, audio: object) -> dict[str, object]:
         self.inputs.append(audio)
         return {"hey_jarvis": self.prediction}
+
+    def reset(self) -> None:
+        self.reset_calls += 1
 
 
 @dataclass
@@ -51,6 +55,8 @@ def test_openwakeword_selects_named_score_and_clamps() -> None:
 
     assert detector.score(audio()) == 1.0
     assert model.inputs == [b"\x00\x00"]
+    detector.reset()
+    assert model.reset_calls == 1
 
 
 @pytest.mark.parametrize("prediction", [None, "bad", float("nan")])
@@ -86,6 +92,9 @@ def test_openwakeword_local_bundle_is_explicitly_onnx_and_offline(
 
         def predict(self, audio: object) -> dict[str, object]:
             return {"hey_jarvis": 0.9}
+
+        def reset(self) -> None:
+            pass
 
     package = ModuleType("openwakeword")
     package.__path__ = []  # type: ignore[attr-defined]

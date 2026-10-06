@@ -501,6 +501,61 @@ def test_evaluate_command_outputs_report(capsys: CaptureFixture[str]) -> None:
     assert report["task_success_rate"] == 0.5
 
 
+def test_evaluate_wakeword_corpus_command_uses_local_bundle_and_report(
+    capsys: CaptureFixture[str],
+    monkeypatch: MonkeyPatch,
+) -> None:
+    bundle = object()
+    manifest = object()
+    detector = object()
+    observed: dict[str, object] = {}
+
+    monkeypatch.setattr(cli_module, "load_wakeword_bundle", lambda path: bundle)
+    monkeypatch.setattr(
+        cli_module.OpenWakeWordDetector,
+        "from_local_bundle",
+        lambda loaded: detector if loaded is bundle else None,
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "load_wakeword_corpus_manifest",
+        lambda path: manifest,
+    )
+
+    def evaluate(loaded, root, loaded_detector, *, threshold):  # type: ignore[no-untyped-def]
+        observed.update(
+            manifest=loaded,
+            root=root,
+            detector=loaded_detector,
+            threshold=threshold,
+        )
+        return SimpleNamespace(
+            model_dump_json=lambda **_options: '{"false_acceptance_rate":0.0}'
+        )
+
+    monkeypatch.setattr(cli_module, "evaluate_wakeword_corpus", evaluate)
+
+    result = main(
+        (
+            "evaluate-wakeword-corpus",
+            "C:/corpus/manifest.json",
+            "C:/corpus",
+            "C:/models/manifest.json",
+            "--threshold",
+            "0.6",
+        )
+    )
+
+    assert result == 0
+    assert json.loads(capsys.readouterr().out) == {"false_acceptance_rate": 0.0}
+    assert observed == {
+        "manifest": manifest,
+        "root": Path("C:/corpus"),
+        "detector": detector,
+        "threshold": 0.6,
+    }
+
+
 def test_smoke_system_info_runs_full_read_only_loop(capsys: CaptureFixture[str]) -> None:
     result = main(("smoke-system-info",))
 

@@ -44,6 +44,34 @@ reference만 사용한다.
 이 하네스의 테스트는 injected STT와 합성 무음 WAV를 사용한다. 실제 한국어 화자 corpus, 장치별
 잡음, wake-word 정확도, faster-whisper 모델 품질은 아직 측정하지 않았다.
 
+## Wake-word FAR/FRR 평가
+
+`evaluate-wakeword-corpus`는 마이크와 네트워크를 열지 않고 동의·SHA-256이 결합된 로컬 WAV만
+읽는다. manifest는 최소 한 개의 목표 호출어 표본과 한 개의 비호출어 표본을 포함해야 한다.
+
+```powershell
+python -m javis_core.cli evaluate-wakeword-corpus `
+  C:\absolute\wake-corpus\manifest.json `
+  C:\absolute\wake-corpus `
+  .\models\openwakeword\manifest.json `
+  --threshold 0.5
+```
+
+모든 파일의 상대경로, symlink, 크기, SHA-256, mono 16 kHz signed 16-bit PCM 형식과 길이를 먼저
+검사한다. 하나라도 실패하면 detector를 한 번도 호출하지 않는다. 각 표본 전에는 openWakeWord
+prediction buffer를 `reset()`해 이전 음성이 다음 표본에 섞이지 않게 한다.
+
+보고서는 원음·파일 경로·동의 ID를 제외하고 sample ID, 목표 포함 여부, 검출 여부, 최대 점수,
+첫 검출 상한 시각과 confusion count만 기록한다. 추론 오류는 분모에서 제거하지 않는다. 보수적으로
+목표 표본 오류는 FN, 비호출어 표본 오류는 FP로 계산하고 `WAKEWORD_INFERENCE_FAILED`를 함께 남긴다.
+임계값은 0.5~0.99만 허용한다.
+
+- FAR = FP / 전체 비호출어 표본 수
+- FRR = FN / 전체 목표 호출어 표본 수
+
+이 값은 제공된 corpus와 마이크·거리·소음 조건에만 해당한다. 실제 동의 corpus 없이 합성 단위시험
+결과를 제품 정확도로 주장하지 않는다.
+
 ## Wake-word model bundle
 
 `models/openwakeword/manifest.json`은 공식 openWakeWord v0.5.1의 ONNX wake-word와 feature model

@@ -21,6 +21,8 @@ if TYPE_CHECKING:
 class WakeModel(Protocol):
     def predict(self, audio: object) -> Mapping[str, object]: ...
 
+    def reset(self) -> None: ...
+
 
 class WhisperSegment(Protocol):
     text: str
@@ -141,6 +143,9 @@ class OpenWakeWordDetector:
         if not math.isfinite(score):
             return 0.0
         return min(1.0, max(0.0, score))
+
+    def reset(self) -> None:
+        self._model.reset()
 
 
 class PcmEnergyVad:

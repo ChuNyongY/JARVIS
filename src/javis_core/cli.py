@@ -88,6 +88,12 @@ from .user_validation import (
     UserValidationWorkflow,
 )
 from .verifier import PredicateVerifier
+from .voice_adapters import OpenWakeWordDetector
+from .wakeword_bundle import load_wakeword_bundle
+from .wakeword_evaluation import (
+    evaluate_wakeword_corpus,
+    load_wakeword_corpus_manifest,
+)
 from .windows_tray import WindowsTrayController, show_runtime_status_message
 from .windows_user_validation import ConsoleHumanAssessment, WindowsUserValidationRunners
 from .worker_process import EXPLORER_WORKER_TOKEN, TTS_WORKER_TOKEN, UIA_WORKER_TOKEN
@@ -201,6 +207,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Analyze paired B0/B1/P1/P2 study observations",
     )
     study.add_argument("path", type=Path)
+
+    wakeword_evaluation = subparsers.add_parser(
+        "evaluate-wakeword-corpus",
+        help="Evaluate local wake-word FAR/FRR without opening a microphone",
+    )
+    wakeword_evaluation.add_argument("manifest", type=Path)
+    wakeword_evaluation.add_argument("corpus_root", type=Path)
+    wakeword_evaluation.add_argument("wakeword_manifest", type=Path)
+    wakeword_evaluation.add_argument("--threshold", type=float, default=0.5)
 
     smoke = subparsers.add_parser(
         "smoke-system-info",
@@ -348,6 +363,18 @@ def main(arguments: Sequence[str] | None = None) -> int:
     if args.command == "evaluate":
         evaluation_report = evaluate_trials(load_trials(args.path))
         print(evaluation_report.model_dump_json(indent=2))
+        return 0
+    if args.command == "evaluate-wakeword-corpus":
+        detector = OpenWakeWordDetector.from_local_bundle(
+            load_wakeword_bundle(args.wakeword_manifest)
+        )
+        wakeword_report = evaluate_wakeword_corpus(
+            load_wakeword_corpus_manifest(args.manifest),
+            args.corpus_root,
+            detector,
+            threshold=args.threshold,
+        )
+        print(wakeword_report.model_dump_json(indent=2))
         return 0
     if args.command == "smoke-system-info":
         return _smoke_system_info(args.audit_path)

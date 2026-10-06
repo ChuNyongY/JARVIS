@@ -439,3 +439,5 @@ recovery는 파일을 이동하거나 삭제하지 않고, 관찰된 상태에 �
 - 공개 Jarvis 세 구현은 Google STT 결과 문자열 검사 방식이라 현재 로컬 관문보다 개인정보·오프라인·
   오작동 경계가 약했다. 복사하지 않고 한국어 맞춤 ONNX 모델을 FAR/FRR로 평가하기로 했다.
 - 전체 회귀는 766 passed, 3 skipped, Ruff clean, mypy strict 123 source files다.
+- 후속 wake-word corpus 하네스와 CLI를 추가한 뒤 전체 회귀는 783 passed, 3 skipped,
+  Ruff clean, mypy strict 124 source files다. 실제 동의 corpus가 없으므로 FAR/FRR 측정값은 아직 없다.

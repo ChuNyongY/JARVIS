@@ -154,6 +154,7 @@ python -m javis_core.cli intent-scenarios evaluation/intent_scenarios.json
 python -m javis_core.cli validate-integrated-scenarios evaluation/integrated_scenarios.json
 python -m javis_core.cli validate-benchmark-tasks evaluation/benchmark_tasks.json evaluation/integrated_scenarios.json
 python -m javis_core.cli analyze-benchmark-results evaluation/benchmark_tasks.json evaluation/integrated_scenarios.json C:\absolute\benchmark-observations.json C:\absolute\benchmark-evidence
+python -m javis_core.cli evaluate-wakeword-corpus C:\absolute\wake-corpus\manifest.json C:\absolute\wake-corpus models/openwakeword/manifest.json --threshold 0.5
 python -m javis_core.cli run-host-safe-scenarios evaluation/integrated_scenarios.json (Get-Location).Path
 python -m javis_core.cli run-mock-scenarios evaluation/integrated_scenarios.json
 python -m javis_core.cli run-fixture-scenarios evaluation/integrated_scenarios.json

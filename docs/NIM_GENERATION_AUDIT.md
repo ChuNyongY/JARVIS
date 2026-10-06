@@ -1415,3 +1415,14 @@ NIM 결과는 그대로 반영하지 않았다. 감사 과정에서 다음 문�
   경계, 현재 실기기 증거, 성능 수치 비주장, 동의 기반 평가 데이터 원칙은 Codex가 공식 문서와
   로컬 코드에 맞춰 보정해 `docs/WAKEWORD_REFERENCE_AUDIT.md`로 작성했다.
 - 전체 회귀는 766 passed, 3 skipped이며 Ruff와 mypy strict도 통과했다.
+
+## 2026-10-07 Wake-word FAR/FRR 하네스 초안 감사
+
+- NIM에 strict manifest, 선검증 WAV, 표본별 detector reset, FAR/FRR 집계와 개인정보 최소 보고서의
+  코드·테스트 초안을 요청했다. 키, 원음, 인식문, 사용자 식별정보는 보내지 않았다.
+- 초안은 Pydantic strict bool을 잘못 설명하고 존재하지 않는 `frame.duration_ms`와 별도 모듈 API를
+  만들었으며, 음성 표본 추론 실패를 FAR 분모에만 포함해 성능을 과장할 수 있어 그대로 폐기했다.
+- 선검증, reset isolation, 오류 비제외 원칙만 채택했다. Codex가 기존 WAV 검증기를 구조적으로
+  재사용하고 오류를 보수적 adverse outcome으로 세는 typed report, CLI와 회귀시험을 구현·감사했다.
+- 전체 회귀는 783 passed, 3 skipped, Ruff clean, mypy strict 124 source files다. 실제 동의 corpus가
+  없으므로 성능 수치를 생성하지 않았다.
