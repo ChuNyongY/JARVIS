@@ -1520,3 +1520,8 @@ NIM 결과는 그대로 반영하지 않았다. 감사 과정에서 다음 문�
 - 공식 영어 모델과 호출어가 없는 합성 양성·비호출어 각 1개로 CLI 전체 경로를 실행했다. 모든 후보가
   FAR 0/FRR 1로 같아 동률 규칙에 따라 0.99가 선택됐다. 이는 선택 알고리즘 연결 증거일 뿐 모델이나
   임계값의 품질 증거가 아니며 실제 보정 corpus에는 사용하지 않는다.
+- 보정 도구를 포함한 wheel은 130 entry, 307,300바이트, SHA-256
+  `b427764fca7843ca833ac785fb69f156f4ed6b570396e96c9307037bdb54768f`다. one-folder manifest
+  SHA-256은 `76c35518ec503c196d7a70de9a9a00538438ff523db8dec9a6a6e33bd843f018`, Setup SHA-256은
+  `18630f573286f9879f1ae15ff5458df0a1e8c96f0ce581f484016322ccfcfdaf`다. frozen 보정 결과는 소스와
+  동일했고, package/Setup 1,828개 파일의 실제 key exact match와 package `NIM.txt`는 0건이다.

@@ -7,16 +7,16 @@
 전체 회귀는 824 passed, 3 skipped, line coverage 83%, Ruff clean, mypy strict 126 source files다.
 소스 doctor 15/15, Credential preflight 3/3과 13-capability service `CREATED`를 재확인했다.
 
-새 wheel은 129개 entry, 305,279바이트, SHA-256
-`69c3c7b66a7a36f420a42e1f566595d78ad3bc7719e3ad9812895385725d30d6`이며 빈 venv에 필수
-dependency와 함께 설치한 뒤 호출어 수집 CLI와 공개 API import가 PASS했다. 새 one-folder는
-1,826 manifest entry, manifest 포함 520,543,351바이트이고 manifest SHA-256은
-`813687c60c5794c2198f51b258840914c1aa43d83120c46188b42c532baedac4`이다. exact manifest,
-frozen 수집 CLI 비동의 안전 종료, doctor(required PASS, build SDK WARN), Credential `PRESENT`,
-preflight 3/3, 13-capability service 조립이 PASS했다.
+새 wheel은 130개 entry, 307,300바이트, SHA-256
+`b427764fca7843ca833ac785fb69f156f4ed6b570396e96c9307037bdb54768f`이며 빈 venv에 필수
+dependency와 함께 설치한 뒤 호출어 보정 CLI와 공개 API import가 PASS했다. 새 one-folder는
+1,826 manifest entry, manifest 포함 520,553,537바이트이고 manifest SHA-256은
+`76c35518ec503c196d7a70de9a9a00538438ff523db8dec9a6a6e33bd843f018`이다. exact manifest,
+frozen 합성 보정과 수집 CLI 비동의 안전 종료, doctor, Credential `PRESENT`, preflight 3/3,
+13-capability service 조립이 PASS했다.
 
-새 Setup은 260,354,048바이트, SHA-256
-`7def8ac48aaf7fade9304633c292914c9be95e6730f73ea98a2a52e6fffde532`이고 sidecar와 일치한다.
+새 Setup은 260,366,336바이트, SHA-256
+`18630f573286f9879f1ae15ff5458df0a1e8c96f0ce581f484016322ccfcfdaf`이고 sidecar와 일치한다.
 package/Setup 1,828개 파일에서 실제 NIM key exact match와 package `NIM.txt`는 0건이다. release audit은
 manifest와 Setup hash PASS, console/tray/Setup signature는 인증서 부재로 FAIL이다. 새 Setup은
 생성·감사까지만 했고 실제 설치 smoke는 아직 이전 2026-10-06 산출물의 증거만 유지된다.
@@ -256,15 +256,15 @@ Chrome 자동 업데이트로 발생한 등록 해시 drift를 수정했고, 최
 mypy strict 126 source files다. Windows Hello helper는 경고 0/오류 0으로 재빌드됐고 source doctor 15개 항목은
 모두 PASS했다. Windows Credential Manager의 고정 target은 실제 `PRESENT`이고 Credential product-host
 preflight도 config/secret/doctor 3/3 PASS했다. 배포 대상 실제 key exact-match scan도 통과했다.
-최신 wheel은 129개 entry이며
+최신 wheel은 130개 entry이며
 외부 artifact hash를 강제하는 30-task benchmark observation analyzer와 exact-grid collector, signed snapshot-cell consumer, benchmark/VM evidence validator, memory/fixture/DOCX/package/reset
 준비, storage/message/mock scenario, PDF, volume, event context, Vision, product voice composition과 preflight,
 runtime status HUD, native tray, exact-owned autostart, package manifest·Credential Manager 키 provisioning, 단계별 fresh-consent 사용자 검증과 Settings page 독립 검증,
 13-capability Windows product service, privacy-minimized foreground Planner context, lazy `memory.search`, 제한된 HTTPS browser navigation, Explorer exact-folder adapter,
 capability verifier router와 CLI entry point를
-포함한다. wheel은 305,279바이트이고 SHA-256은
-`69c3c7b66a7a36f420a42e1f566595d78ad3bc7719e3ad9812895385725d30d6`이다. 새 격리 설치에서
-호출어 수집 CLI와 공개 API import를 확인했고, frozen package에서 Credential status `PRESENT`, preflight 3/3
+포함한다. wheel은 307,300바이트이고 SHA-256은
+`b427764fca7843ca833ac785fb69f156f4ed6b570396e96c9307037bdb54768f`이다. 새 격리 설치에서
+호출어 보정 CLI와 공개 API import를 확인했고, frozen package에서 Credential status `PRESENT`, preflight 3/3
 PASS와 13-capability service `CREATED`를 재현했다. 기존 50-request export와 70셀 ledger,
 S01 Chrome actual nominal/launch-failure와 exact cleanup, S02 actual nominal/APP_DELAY와 복원,
 13-capability product-service 조립 증거도 유지된다.
@@ -284,9 +284,9 @@ false activation을 실패로 기록했다. snapshot VM unavailable 50, runner u
 
 실제 PyInstaller one-folder는 1,826개 manifest entry를 가지며 source verifier로 exact manifest를
 통과했다. package manifest SHA-256은
-`813687c60c5794c2198f51b258840914c1aa43d83120c46188b42c532baedac4`다. per-user IExpress
-Setup은 260,354,048바이트, SHA-256
-`7def8ac48aaf7fade9304633c292914c9be95e6730f73ea98a2a52e6fffde532`이고 키를 포함하지 않으며
+`76c35518ec503c196d7a70de9a9a00538438ff523db8dec9a6a6e33bd843f018`다. per-user IExpress
+Setup은 260,366,336바이트, SHA-256
+`18630f573286f9879f1ae15ff5458df0a1e8c96f0ce581f484016322ccfcfdaf`이고 키를 포함하지 않으며
 자동 시작을 켜지 않는다. PowerShell 실행정책 실패를 0으로 숨기던 진입부를 배치 기반 hash/extract/
 manifest 검증으로 교체했다. 이전 Setup의 실제 최초 설치와 설치본 제품 조립 증거는 유지되지만 새
 Setup은 생성·감사만 완료했다. 생성된 Setup은 아직 Authenticode
