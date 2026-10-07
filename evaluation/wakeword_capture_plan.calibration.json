@@ -1,0 +1,121 @@
+{
+  "schema_version": "1.1",
+  "corpus_id": "ko-jarvis-local-calibration-01",
+  "locale": "ko-KR",
+  "duration_ms": 3200,
+  "samples": [
+    {
+      "sample_id": "cal-near-quiet-positive-a",
+      "target_present": true,
+      "distance_band": "NEAR_0_5M",
+      "noise_condition": "QUIET",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-near-quiet-negative-natural",
+      "target_present": false,
+      "distance_band": "NEAR_0_5M",
+      "noise_condition": "QUIET",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-near-quiet-positive-b",
+      "target_present": true,
+      "distance_band": "NEAR_0_5M",
+      "noise_condition": "QUIET",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-near-quiet-negative-name-only",
+      "target_present": false,
+      "distance_band": "NEAR_0_5M",
+      "noise_condition": "QUIET",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-near-speech-positive-a",
+      "target_present": true,
+      "distance_band": "NEAR_0_5M",
+      "noise_condition": "SPEECH",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-near-speech-negative-natural",
+      "target_present": false,
+      "distance_band": "NEAR_0_5M",
+      "noise_condition": "SPEECH",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-near-speech-positive-b",
+      "target_present": true,
+      "distance_band": "NEAR_0_5M",
+      "noise_condition": "SPEECH",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-near-speech-negative-name-only",
+      "target_present": false,
+      "distance_band": "NEAR_0_5M",
+      "noise_condition": "SPEECH",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-far-quiet-positive-a",
+      "target_present": true,
+      "distance_band": "FAR_3_5M",
+      "noise_condition": "QUIET",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-far-quiet-negative-natural",
+      "target_present": false,
+      "distance_band": "FAR_3_5M",
+      "noise_condition": "QUIET",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-far-quiet-positive-b",
+      "target_present": true,
+      "distance_band": "FAR_3_5M",
+      "noise_condition": "QUIET",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-far-quiet-negative-name-only",
+      "target_present": false,
+      "distance_band": "FAR_3_5M",
+      "noise_condition": "QUIET",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-far-speech-positive-a",
+      "target_present": true,
+      "distance_band": "FAR_3_5M",
+      "noise_condition": "SPEECH",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-far-speech-negative-natural",
+      "target_present": false,
+      "distance_band": "FAR_3_5M",
+      "noise_condition": "SPEECH",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-far-speech-positive-b",
+      "target_present": true,
+      "distance_band": "FAR_3_5M",
+      "noise_condition": "SPEECH",
+      "session_index": 10
+    },
+    {
+      "sample_id": "cal-far-speech-negative-name-only",
+      "target_present": false,
+      "distance_band": "FAR_3_5M",
+      "noise_condition": "SPEECH",
+      "session_index": 10
+    }
+  ]
+}
+

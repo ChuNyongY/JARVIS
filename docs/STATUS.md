@@ -517,9 +517,12 @@ recovery는 파일을 이동하거나 삭제하지 않고, 관찰된 상태에 �
   원거리 양성 1개를 놓쳤다. 일반 인식만 쓰는 실험 어댑터, 3.2초 확정·0.8초 겹침 창, 전사문
   비노출, 정확한 15파일 manifest 검증과 별도 평가 CLI를 추가했다. 첫 검출 상한은 2,080 ms와
   3,200 ms였다. 4표본은 성능 근거가 아니며 264,364,726바이트의 풀린 모델과 선택 의존성은 기본
-  제품·설치본에 넣지 않았다. 전체 회귀는 841 passed, 3 skipped, coverage 83%, Ruff clean,
+  제품·설치본에 넣지 않았다. 전체 회귀는 843 passed, 3 skipped, coverage 83%, Ruff clean,
   mypy strict 128 source files다.
 - 최신 wheel SHA-256은 `dd7012317e3667fb6caa9f02eecbbfd3eba9b39f371f393938b1e37562efffe6`,
   one-folder manifest SHA-256은 `ab95beca300eaf90b43a4e940dcbf588d4f16917a28fc47b36a6940efb56c087`,
   Setup SHA-256은 `cb4edd33413732c7f69fc4662c848f22c1fcee7decb2d1caeed65bfd3fd428c5`다.
   기본 배포물의 Vosk 모델/native 파일은 0건이며 서명은 아직 `NotSigned`다.
+- 4표본 pilot과 섞이지 않는 보정 세션 16표본·최종시험 세션 16표본 계획을 추가했다. 각 계획은
+  근거리/원거리×조용함/사람 말소리 네 조건에 양성·평범한 음성·이름만 말하는 어려운 음성을
+  균형 배치하며, 서로 다른 새 동의와 새 출력 폴더가 필요하다. 아직 녹음은 시작하지 않았다.

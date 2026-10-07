@@ -74,6 +74,18 @@ python -m javis_core.cli capture-wakeword-corpus `
   C:\absolute\new-wake-corpus-directory
 ```
 
+4표본 절차 pilot 뒤에는 다음 두 고정 계획을 사용한다.
+
+- `evaluation/wakeword_capture_plan.calibration.json`: 세션 10, 16표본
+- `evaluation/wakeword_capture_plan.final-test.json`: 세션 20, 16표본
+
+각 계획은 근거리/원거리와 조용함/사람 말소리의 네 조건에 양성 2개·비호출어 2개를 둔다. 구체적인
+문구는 `evaluation/wakeword_capture_prompts.ko.md`에 고정했다. 비호출어에는 평범한 문장뿐 아니라
+“자비스”만 말하고 “헤이”는 말하지 않는 어려운 음성도 포함한다. 전체 문구가 아닌 이름만으로
+켜지는 후보는 이 표본에서 FP로 계산한다. 두 계획은 서로 다른 시간에 각각 새 동의를 받고 실행하며,
+보정 결과를 본 뒤 최종시험 계획이나 판정 규칙을 바꾸지 않는다. 이 16+16 표본도 단일 화자의 로컬
+개인화 확인에 불과하며 여러 화자에 대한 일반 성능 근거는 아니다.
+
 ## 임계값 고정과 최종 평가
 
 보정 묶음에서 모델별 임계값 후보를 미리 정한 동일한 격자로 비교한다. FAR 상한을 먼저 만족하는

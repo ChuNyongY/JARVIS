@@ -1566,7 +1566,8 @@ NIM 결과는 그대로 반영하지 않았다. 감사 과정에서 다음 문�
 - 80 ms streaming 및 정식 평가 CLI에서 TP 2/TN 2/FP 0/FN 0, 추론 실패 0을 재현했다. 제한 문법의
   FP 1과 증폭 원거리 FN 1도 별도로 확인해 두 방식을 제외했다. 이 수치는 2+/2- pilot이라 성능 개선
   또는 제품 채택 근거로 쓰지 않는다.
-- 전체 검증은 841 passed, 3 skipped, coverage 83%, Ruff clean, mypy strict 128 source files다.
+- 전체 검증은 이후 고정 보정·최종시험 계획 검사까지 포함해 843 passed, 3 skipped, coverage 83%,
+  Ruff clean, mypy strict 128 source files다.
 - 132-entry wheel은 311,893바이트, SHA-256
   `dd7012317e3667fb6caa9f02eecbbfd3eba9b39f371f393938b1e37562efffe6`이며 깨끗한 환경에서 Vosk가
   설치되지 않은 채 import와 실험 CLI 등록을 통과했다. 1,826-entry one-folder manifest SHA-256은

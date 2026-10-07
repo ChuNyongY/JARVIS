@@ -96,7 +96,7 @@
 
 ## 현재 릴리스 증거
 
-- Python 전체: 841 passed, 3 skipped, line coverage 83%.
+- Python 전체: 843 passed, 3 skipped, line coverage 83%.
 - Ruff clean, mypy strict 128 source files.
 - Windows Hello helper build: warning 0, error 0.
 - `javis doctor`: SAPI와 optional pycaw를 포함한 15개 check PASS.

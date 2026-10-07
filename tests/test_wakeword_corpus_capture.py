@@ -352,3 +352,36 @@ def test_console_readiness_displays_fixed_korean_capture_condition(
 
     assert readiness(sample)
     assert expected in output.getvalue()
+
+
+@pytest.mark.parametrize(
+    ("path", "corpus_id", "session_index"),
+    [
+        (
+            Path("evaluation/wakeword_capture_plan.calibration.json"),
+            "ko-jarvis-local-calibration-01",
+            10,
+        ),
+        (
+            Path("evaluation/wakeword_capture_plan.final-test.json"),
+            "ko-jarvis-local-final-01",
+            20,
+        ),
+    ],
+)
+def test_repository_calibration_and_final_plans_are_separate_and_balanced(
+    path: Path,
+    corpus_id: str,
+    session_index: int,
+) -> None:
+    plan = load_wakeword_capture_plan(path)
+
+    assert plan.corpus_id == corpus_id
+    assert len(plan.samples) == 16
+    assert {sample.session_index for sample in plan.samples} == {session_index}
+    grouped: dict[tuple[WakeWordDistanceBand, WakeWordNoiseCondition], set[bool]] = {}
+    for sample in plan.samples:
+        key = (sample.distance_band, sample.noise_condition)
+        grouped.setdefault(key, set()).add(sample.target_present)
+    assert len(grouped) == 4
+    assert all(labels == {False, True} for labels in grouped.values())
