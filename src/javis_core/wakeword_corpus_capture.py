@@ -11,12 +11,17 @@ from pathlib import Path
 from typing import Protocol, TextIO
 from uuid import UUID, uuid4
 
-from pydantic import Field, StrictBool, TypeAdapter, model_validator
+from pydantic import Field, StrictBool, StrictInt, TypeAdapter, model_validator
 
 from .cancellation import CancellationToken
 from .models import FrozenModel
 from .voice import AudioFrame
-from .wakeword_evaluation import WakeWordCorpusManifest, WakeWordCorpusSample
+from .wakeword_evaluation import (
+    WakeWordCorpusManifest,
+    WakeWordCorpusSample,
+    WakeWordDistanceBand,
+    WakeWordNoiseCondition,
+)
 from .windows_acl import WindowsUserOnlyAcl
 
 
@@ -27,14 +32,17 @@ class WakeWordCaptureError(RuntimeError):
 class WakeWordCaptureSample(FrozenModel):
     sample_id: str = Field(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9._-]+$")
     target_present: StrictBool
+    distance_band: WakeWordDistanceBand = WakeWordDistanceBand.UNSPECIFIED
+    noise_condition: WakeWordNoiseCondition = WakeWordNoiseCondition.UNSPECIFIED
+    session_index: StrictInt = Field(default=0, ge=0, le=100)
 
 
 class WakeWordCapturePlan(FrozenModel):
-    schema_version: str = Field(default="1.0", pattern=r"^1\.0$")
+    schema_version: str = Field(default="1.1", pattern=r"^1\.[01]$")
     corpus_id: str = Field(min_length=1, max_length=128, pattern=r"^[A-Za-z0-9._-]+$")
     locale: str = Field(default="ko-KR", pattern=r"^ko-KR$")
     duration_ms: int = Field(default=3_200, ge=1_600, le=10_000)
-    samples: tuple[WakeWordCaptureSample, ...] = Field(min_length=2, max_length=100)
+    samples: tuple[WakeWordCaptureSample, ...] = Field(min_length=2, max_length=1_000)
 
     @model_validator(mode="after")
     def duration_and_samples_are_valid(self) -> WakeWordCapturePlan:
@@ -45,6 +53,14 @@ class WakeWordCapturePlan(FrozenModel):
             raise ValueError("capture sample IDs must be unique")
         if {sample.target_present for sample in self.samples} != {False, True}:
             raise ValueError("capture plan requires target and non-target samples")
+        conditions: dict[
+            tuple[WakeWordDistanceBand, WakeWordNoiseCondition, int], set[bool]
+        ] = {}
+        for sample in self.samples:
+            key = (sample.distance_band, sample.noise_condition, sample.session_index)
+            conditions.setdefault(key, set()).add(sample.target_present)
+        if any(labels != {False, True} for labels in conditions.values()):
+            raise ValueError("every capture condition requires target and non-target samples")
         return self
 
 
@@ -210,6 +226,9 @@ def capture_wakeword_corpus(
                     audio_sha256=digest,
                     target_present=specification.target_present,
                     consent_record_id=str(consent_id),
+                    distance_band=specification.distance_band,
+                    noise_condition=specification.noise_condition,
+                    session_index=specification.session_index,
                 )
             )
         manifest = WakeWordCorpusManifest(

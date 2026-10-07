@@ -610,9 +610,12 @@ from .wakeword_corpus_capture import (
 )
 from .wakeword_evaluation import (
     ResettableWakeWordDetector,
+    WakeWordConditionReport,
     WakeWordCorpusManifest,
     WakeWordCorpusReport,
     WakeWordCorpusSample,
+    WakeWordDistanceBand,
+    WakeWordNoiseCondition,
     WakeWordSampleReport,
     evaluate_wakeword_corpus,
     load_wakeword_corpus_manifest,
@@ -1045,6 +1048,9 @@ __all__ = [
     "WakeWordCorpusManifest",
     "WakeWordCorpusReport",
     "WakeWordCorpusSample",
+    "WakeWordConditionReport",
+    "WakeWordDistanceBand",
+    "WakeWordNoiseCondition",
     "ConsoleWakeWordCaptureConsent",
     "ConsoleWakeWordCaptureReadiness",
     "WakeWordCaptureError",

@@ -17,6 +17,8 @@ from javis_core import (
     WakeWordCaptureError,
     WakeWordCapturePlan,
     WakeWordCaptureSample,
+    WakeWordDistanceBand,
+    WakeWordNoiseCondition,
     capture_wakeword_corpus,
     load_wakeword_capture_plan,
 )
@@ -209,6 +211,29 @@ def test_capture_plan_rejects_unbalanced_or_duplicate_samples(
         WakeWordCapturePlan(corpus_id="invalid", samples=samples)
 
 
+def test_capture_plan_rejects_unbalanced_condition() -> None:
+    with pytest.raises(ValidationError, match="every capture condition"):
+        WakeWordCapturePlan(
+            corpus_id="invalid-condition",
+            samples=(
+                WakeWordCaptureSample(
+                    sample_id="near-positive",
+                    target_present=True,
+                    distance_band=WakeWordDistanceBand.NEAR_0_5M,
+                    noise_condition=WakeWordNoiseCondition.QUIET,
+                    session_index=1,
+                ),
+                WakeWordCaptureSample(
+                    sample_id="far-negative",
+                    target_present=False,
+                    distance_band=WakeWordDistanceBand.FAR_3_5M,
+                    noise_condition=WakeWordNoiseCondition.QUIET,
+                    session_index=1,
+                ),
+            ),
+        )
+
+
 def test_capture_plan_loader_rejects_duplicate_json_keys(tmp_path: Path) -> None:
     path = tmp_path / "plan.json"
     path.write_text(
@@ -219,6 +244,29 @@ def test_capture_plan_loader_rejects_duplicate_json_keys(tmp_path: Path) -> None
 
     with pytest.raises(WakeWordCaptureError, match="duplicate"):
         load_wakeword_capture_plan(path)
+
+
+def test_capture_plan_loader_accepts_legacy_schema_without_conditions(
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "legacy-plan.json"
+    path.write_text(
+        '{"schema_version":"1.0","corpus_id":"legacy","locale":"ko-KR",'
+        '"duration_ms":1600,"samples":['
+        '{"sample_id":"positive","target_present":true},'
+        '{"sample_id":"negative","target_present":false}]}',
+        encoding="utf-8",
+    )
+
+    loaded = load_wakeword_capture_plan(path)
+
+    assert loaded.schema_version == "1.0"
+    assert all(
+        sample.distance_band is WakeWordDistanceBand.UNSPECIFIED
+        and sample.noise_condition is WakeWordNoiseCondition.UNSPECIFIED
+        and sample.session_index == 0
+        for sample in loaded.samples
+    )
 
 
 def test_console_capture_consent_requires_exact_fresh_phrase() -> None:

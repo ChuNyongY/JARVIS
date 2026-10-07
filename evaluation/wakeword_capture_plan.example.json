@@ -1,12 +1,12 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "corpus_id": "ko-jarvis-local-pilot",
   "locale": "ko-KR",
   "duration_ms": 3200,
   "samples": [
-    {"sample_id": "positive-01", "target_present": true},
-    {"sample_id": "positive-02", "target_present": true},
-    {"sample_id": "negative-01", "target_present": false},
-    {"sample_id": "negative-02", "target_present": false}
+    {"sample_id": "near-quiet-positive", "target_present": true, "distance_band": "NEAR_0_5M", "noise_condition": "QUIET", "session_index": 1},
+    {"sample_id": "near-quiet-negative", "target_present": false, "distance_band": "NEAR_0_5M", "noise_condition": "QUIET", "session_index": 1},
+    {"sample_id": "far-speech-positive", "target_present": true, "distance_band": "FAR_3_5M", "noise_condition": "SPEECH", "session_index": 2},
+    {"sample_id": "far-speech-negative", "target_present": false, "distance_band": "FAR_3_5M", "noise_condition": "SPEECH", "session_index": 2}
   ]
 }

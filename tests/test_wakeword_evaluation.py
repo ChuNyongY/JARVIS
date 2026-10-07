@@ -13,6 +13,8 @@ from javis_core.voice_evaluation import VoiceCorpusError
 from javis_core.wakeword_evaluation import (
     WakeWordCorpusManifest,
     WakeWordCorpusSample,
+    WakeWordDistanceBand,
+    WakeWordNoiseCondition,
     evaluate_wakeword_corpus,
     load_wakeword_corpus_manifest,
 )
@@ -117,6 +119,77 @@ def test_inference_failures_receive_conservative_adverse_outcomes(
     assert "private" not in report.canonical_json()
 
 
+def test_condition_reports_are_balanced_sorted_and_keep_failures_adverse(
+    tmp_path: Path,
+) -> None:
+    manifest, root = prepare_manifest(tmp_path)
+    conditioned = manifest.model_copy(
+        update={
+            "samples": (
+                manifest.samples[0].model_copy(
+                    update={
+                        "distance_band": WakeWordDistanceBand.NEAR_0_5M,
+                        "noise_condition": WakeWordNoiseCondition.QUIET,
+                        "session_index": 1,
+                    }
+                ),
+                manifest.samples[1].model_copy(
+                    update={
+                        "distance_band": WakeWordDistanceBand.FAR_3_5M,
+                        "noise_condition": WakeWordNoiseCondition.SPEECH,
+                        "session_index": 2,
+                    }
+                ),
+                manifest.samples[2].model_copy(
+                    update={
+                        "distance_band": WakeWordDistanceBand.FAR_3_5M,
+                        "noise_condition": WakeWordNoiseCondition.SPEECH,
+                        "session_index": 2,
+                    }
+                ),
+                manifest.samples[3].model_copy(
+                    update={
+                        "distance_band": WakeWordDistanceBand.NEAR_0_5M,
+                        "noise_condition": WakeWordNoiseCondition.QUIET,
+                        "session_index": 1,
+                    }
+                ),
+            )
+        }
+    )
+    conditioned = WakeWordCorpusManifest.model_validate(conditioned.model_dump())
+    detector = SequencedDetector(
+        [[RuntimeError("failure")], [0.8, 0.1], [0.2, 0.1], [0.2, 0.1]]
+    )
+
+    report = evaluate_wakeword_corpus(conditioned, root, detector)
+
+    assert [condition.distance_band for condition in report.conditions] == [
+        WakeWordDistanceBand.FAR_3_5M,
+        WakeWordDistanceBand.NEAR_0_5M,
+    ]
+    far, near = report.conditions
+    assert (far.false_acceptance_rate, far.false_rejection_rate) == (1.0, 1.0)
+    assert (near.false_acceptance_rate, near.false_rejection_rate) == (0.0, 1.0)
+    assert near.inference_failures == 1
+    assert "consent-0" not in report.canonical_json()
+
+
+def test_manifest_rejects_condition_without_both_labels(tmp_path: Path) -> None:
+    manifest, _root = prepare_manifest(tmp_path, labels=(True, False))
+    invalid_samples = (
+        manifest.samples[0].model_copy(
+            update={"distance_band": WakeWordDistanceBand.NEAR_0_5M}
+        ),
+        manifest.samples[1].model_copy(
+            update={"distance_band": WakeWordDistanceBand.FAR_3_5M}
+        ),
+    )
+
+    with pytest.raises(ValueError, match="every wake-word condition"):
+        WakeWordCorpusManifest(corpus_id="unbalanced-condition", samples=invalid_samples)
+
+
 def test_all_audio_is_validated_before_detector_is_reset(tmp_path: Path) -> None:
     manifest, root = prepare_manifest(tmp_path, labels=(True, False))
     invalid = manifest.model_copy(
@@ -178,6 +251,28 @@ def test_manifest_loader_round_trip(tmp_path: Path) -> None:
     )
 
     assert load_wakeword_corpus_manifest(path) == manifest
+
+
+def test_manifest_loader_accepts_legacy_schema_without_conditions(tmp_path: Path) -> None:
+    manifest, _root = prepare_manifest(tmp_path, labels=(True, False))
+    document = manifest.model_dump(mode="json")
+    document["schema_version"] = "1.0"
+    for sample in document["samples"]:
+        del sample["distance_band"]
+        del sample["noise_condition"]
+        del sample["session_index"]
+    path = tmp_path / "legacy-manifest.json"
+    path.write_text(json.dumps(document), encoding="utf-8")
+
+    loaded = load_wakeword_corpus_manifest(path)
+
+    assert loaded.schema_version == "1.0"
+    assert all(
+        sample.distance_band is WakeWordDistanceBand.UNSPECIFIED
+        and sample.noise_condition is WakeWordNoiseCondition.UNSPECIFIED
+        and sample.session_index == 0
+        for sample in loaded.samples
+    )
 
 
 @pytest.mark.parametrize("threshold", [True, 1, 0.49, 1.0])

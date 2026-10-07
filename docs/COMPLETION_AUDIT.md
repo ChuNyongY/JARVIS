@@ -4,7 +4,7 @@
 
 ## 2026-10-07 음성·사용자 검증 갱신
 
-- 전체 회귀는 **812 collected, 809 passed, 3 skipped**, line coverage 83%, Ruff clean,
+- 전체 회귀는 **817 collected, 814 passed, 3 skipped**, line coverage 83%, Ruff clean,
   mypy strict 125 source files다.
   소스 실행 기준 doctor 15/15, Credential preflight 3/3, 13-capability service `CREATED`와
   `capture_running=false`를 재확인했다.
@@ -13,6 +13,8 @@
   호출어 모델이다.
 - 동의·SHA-256이 결합된 로컬 WAV만 읽는 FAR/FRR 평가기와 CLI를 추가했다. 추론 실패를 분모에서
   빼지 않고 양성 표본은 FN, 비호출어 표본은 FP로 보수적으로 계산한다.
+- 자료 형식 1.1은 거리·소음·비식별 세션 조건을 기록하고 각 조건의 양성·비호출어 균형을 강제하며,
+  전체 수치와 같은 실패 산입 원칙으로 조건별 FAR/FRR을 낸다. 1.0 자료는 미지정 조건으로 읽는다.
 - `wakeword-forge` 계열 후보용 RepCNN 어댑터와 별도 평가 CLI를 추가했다. 해시·크기·ONNX 입출력,
   3초 창과 400 ms hop을 검증하지만 제품 기본 경로에는 연결하지 않았다. 공개 `okay-hermes`의 무음
   점수 `0.624035120`과 합성 CLI FAR 0/FRR 1은 연결 증거일 뿐 한국어 성능 근거가 아니다.
@@ -81,14 +83,14 @@
 | B0/B1/P1/P2 비교 | 부분 | strict paired data loader, metric/통계 분석기 | 실제 snapshot VM trial 또는 participant data |
 | 15개 통합 시나리오 | 부분 | strict manifest와 격리, 요구 이름 23/23 cataloged, S01 Chrome process/window actual+cleanup PASS, S02 exact 30% actual+restore PASS, S03 memory/PDF/Edge-window actual fixture+cleanup PASS, S11 actual read-only·S14/S15 policy 3/3 PASS, S06/S13 mock 2/2 PASS·외부효과 0, S04/S05/S07 disposable fixture E2E 3/3 PASS, package-verify/reset-prepare 계약, signed exact-cell snapshot evidence consumer | 외부 snapshot harness의 실제 50셀, 실제 package install, 웹·음성·메시지 및 반복 결과 |
 | UER/Unsafe/Underclassification/TSR/Recovery/CB | 부분 | 계산 계약과 Wilson/McNemar/Holm 보고서 | 사전등록된 실제 관찰값 |
-| 음성 FAR/FRR/CER/WER/Macro-F1 | 부분 | offline corpus manifest/hash/WAV와 CER/WER 하네스 | 동의된 한국어 음성 corpus 및 wake/intent metric |
+| 음성 FAR/FRR/CER/WER/Macro-F1 | 부분 | offline corpus manifest/hash/WAV, 거리·소음·세션별 FAR/FRR과 CER/WER 하네스 | 동의된 한국어 음성 corpus 및 wake/intent metric |
 | 30~50개 작업 80% 목표 | 미검증 | S01~S15별 nominal/fault 30-task strict manifest, schema 1.2 선언/실행 환경 분리, exact 120셀 수집·재개·artifact schema 1.1 assertion 결과 검증. 현재 PC에서 가능한 B0 4, B1 22, P1 22, P2 22를 합쳐 실제 70/120 완료, runner 부재 0, snapshot VM 부재 50. B1/P1은 system verifier·replan 없이 조건 차이를 보존한다 | snapshot VM 50셀, B0/B1/P1/P2 완전 반복 결과와 실제 80% 달성 증거 |
 | RED 무승인 실행 0 | 부분 | policy/approval 단위·통합 계약에서 0 | 실제 VM 위험 scenario 반복 증거 |
 | recoverable failure 60% | 미검증 | fault injection 및 recovery metric 계약 | 실제 또는 VM UI failure 결과 |
 
 ## 현재 릴리스 증거
 
-- Python 전체: 809 passed, 3 skipped, line coverage 83%.
+- Python 전체: 814 passed, 3 skipped, line coverage 83%.
 - Ruff clean, mypy strict 125 source files.
 - Windows Hello helper build: warning 0, error 0.
 - `javis doctor`: SAPI와 optional pycaw를 포함한 15개 check PASS.
