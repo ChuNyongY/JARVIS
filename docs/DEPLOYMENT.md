@@ -103,10 +103,21 @@ python -m javis_core.cli audit-windows-release `
   'CN=배포 인증서의 정확한 Subject'
 ```
 
-현재 one-folder는 1,826 manifest entry이며 source verifier로 exact manifest를 통과했다. package manifest
-SHA-256은 `4127ddbac7d2fee49d6d392031c4f7dac8766d343820d9ec1931ef31ea402abc`다. Setup은 Microsoft 서명된
-시스템 IExpress builder를 사용해 생성한 260,300,800바이트 per-user extractor이며 SHA-256은
-`3690062f16e7172fb96e372f603d736f2e2fe81323f3cbb55176070b17c70c22`이다. 내부 설치 진입부는
+기존 산출물을 덮어쓰지 않고 별도 후보를 만들 때는 새 package와 Setup 경로를 명시한다. 두 경로는
+검증된 기존 파일을 덮어쓰지 않으며 Setup의 부모 디렉터리는 미리 존재해야 한다.
+
+```powershell
+python tools\build_windows_package.py --destination C:\absolute\build\JAVIS-candidate
+python tools\build_windows_installer.py `
+  --package C:\absolute\build\JAVIS-candidate `
+  --destination C:\absolute\build\JAVIS-candidate-Setup.exe
+```
+
+현재 후보 one-folder는 1,826 manifest entry이며 source verifier로 exact manifest를 통과했다.
+package manifest SHA-256은 `6aed3aba7ed881b5a7fa5715867a3df73a0bc99a577ad28a0948684f7181ccb0`다.
+Setup은 Microsoft 서명된 시스템 IExpress builder를 사용해 생성한 260,321,280바이트 per-user
+extractor이며 SHA-256은 `ff1d143f2c35d3158f361ff92c53ba46ae05ce4b3b33569999641848f41362ab`이다.
+내부 설치 진입부는
 PowerShell 실행정책을 우회하지 않고 Windows `cmd`, `certutil`, `tar`와 staged `JAVIS.exe
 verify-package`만 사용한다. 실제 최초 설치, 설치본 manifest 일치, Credential preflight와 서비스 조립을
 통과했다.

@@ -9,6 +9,7 @@ from tools.build_windows_installer import (
     InstallerBuildError,
     create_payload_archive,
     render_install_script,
+    resolve_installer_paths,
 )
 
 
@@ -46,4 +47,77 @@ def test_install_template_rejects_invalid_hash(tmp_path: Path) -> None:
             Path("packaging/install_package.cmd"),
             tmp_path / "install.cmd",
             "not-a-hash",
+        )
+
+
+def test_installer_paths_accept_verified_custom_package_and_destination(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repository = tmp_path / "repository"
+    package = tmp_path / "package"
+    output = tmp_path / "output"
+    for directory in (repository, package, output):
+        directory.mkdir()
+    observed: list[Path] = []
+    monkeypatch.setattr(
+        "tools.build_windows_installer.verify_package_manifest",
+        lambda path: observed.append(path),
+    )
+
+    resolved_package, setup, checksum = resolve_installer_paths(
+        repository,
+        package=package,
+        destination=output / "JAVIS-Candidate.exe",
+    )
+
+    assert resolved_package == package.resolve()
+    assert setup == output.resolve() / "JAVIS-Candidate.exe"
+    assert checksum == output.resolve() / "JAVIS-Candidate.exe.sha256"
+    assert observed == [package.resolve()]
+
+
+@pytest.mark.parametrize("existing_name", ["JAVIS.exe", "JAVIS.exe.sha256"])
+def test_installer_paths_never_overwrite_existing_output(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    existing_name: str,
+) -> None:
+    repository = tmp_path / "repository"
+    package = tmp_path / "package"
+    output = tmp_path / "output"
+    for directory in (repository, package, output):
+        directory.mkdir()
+    (output / existing_name).write_bytes(b"existing")
+    monkeypatch.setattr(
+        "tools.build_windows_installer.verify_package_manifest",
+        lambda _path: None,
+    )
+
+    with pytest.raises(InstallerBuildError, match="DESTINATION_EXISTS"):
+        resolve_installer_paths(
+            repository,
+            package=package,
+            destination=output / "JAVIS.exe",
+        )
+
+
+def test_installer_paths_reject_invalid_custom_destination(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    repository = tmp_path / "repository"
+    package = tmp_path / "package"
+    repository.mkdir()
+    package.mkdir()
+    monkeypatch.setattr(
+        "tools.build_windows_installer.verify_package_manifest",
+        lambda _path: None,
+    )
+
+    with pytest.raises(InstallerBuildError, match="DESTINATION_INVALID"):
+        resolve_installer_paths(
+            repository,
+            package=package,
+            destination=tmp_path / "missing" / "JAVIS.zip",
         )

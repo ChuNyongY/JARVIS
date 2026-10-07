@@ -73,21 +73,22 @@ def build_installer(
     repository: Path,
     *,
     signer: ReleaseSigner | None = None,
+    package: Path | None = None,
+    destination: Path | None = None,
 ) -> tuple[Path, str]:
     root = repository.resolve(strict=True)
-    package = root / "dist" / f"JAVIS-PC-{VERSION}"
-    verify_package_manifest(package)
-    setup = root / "dist" / f"JAVIS-PC-{VERSION}-Setup.exe"
-    checksum = setup.with_suffix(".exe.sha256")
-    if setup.exists() or checksum.exists():
-        raise InstallerBuildError("INSTALLER_DESTINATION_EXISTS")
+    package_root, setup, checksum = resolve_installer_paths(
+        root,
+        package=package,
+        destination=destination,
+    )
     build_parent = root / "build" / "windows-installer"
     build_parent.mkdir(parents=True, exist_ok=True)
     temporary = build_parent / f"build-{uuid4().hex}"
     temporary.mkdir()
     try:
         payload = temporary / PAYLOAD_NAME
-        payload_hash = create_payload_archive(package, payload)
+        payload_hash = create_payload_archive(package_root, payload)
         install_script = temporary / "install.cmd"
         render_install_script(
             root / "packaging" / "install_package.cmd",
@@ -121,6 +122,40 @@ def build_installer(
     finally:
         if temporary.exists():
             _remove_owned_temporary(temporary, build_parent)
+
+
+def resolve_installer_paths(
+    repository: Path,
+    *,
+    package: Path | None = None,
+    destination: Path | None = None,
+) -> tuple[Path, Path, Path]:
+    root = repository.resolve(strict=True)
+    package_candidate = package or root / "dist" / f"JAVIS-PC-{VERSION}"
+    if package_candidate.is_symlink() or not package_candidate.is_dir():
+        raise InstallerBuildError("PACKAGE_INVALID")
+    package_root = package_candidate.resolve(strict=True)
+    verify_package_manifest(package_root)
+
+    setup_candidate = destination or root / "dist" / f"JAVIS-PC-{VERSION}-Setup.exe"
+    if setup_candidate.is_symlink() or setup_candidate.suffix.lower() != ".exe":
+        raise InstallerBuildError("INSTALLER_DESTINATION_INVALID")
+    try:
+        setup_parent = setup_candidate.parent.resolve(strict=True)
+    except OSError as error:
+        raise InstallerBuildError("INSTALLER_DESTINATION_INVALID") from error
+    if not setup_parent.is_dir():
+        raise InstallerBuildError("INSTALLER_DESTINATION_INVALID")
+    setup = setup_parent / setup_candidate.name
+    checksum = setup.with_suffix(".exe.sha256")
+    if (
+        setup.exists()
+        or setup.is_symlink()
+        or checksum.exists()
+        or checksum.is_symlink()
+    ):
+        raise InstallerBuildError("INSTALLER_DESTINATION_EXISTS")
+    return package_root, setup, checksum
 
 
 def _write_sed(path: Path, source: Path, setup: Path) -> None:
@@ -193,6 +228,8 @@ def main() -> int:
     import argparse
 
     parser = argparse.ArgumentParser()
+    parser.add_argument("--package", type=Path)
+    parser.add_argument("--destination", type=Path)
     parser.add_argument("--certificate-thumbprint")
     parser.add_argument("--expected-publisher")
     parser.add_argument("--timestamp-url")
@@ -210,7 +247,12 @@ def main() -> int:
         else None
     )
     repository = Path(__file__).resolve().parent.parent
-    setup, digest = build_installer(repository, signer=signer)
+    setup, digest = build_installer(
+        repository,
+        signer=signer,
+        package=arguments.package,
+        destination=arguments.destination,
+    )
     print(f"installer={setup}")
     print(f"sha256={digest}")
     return 0

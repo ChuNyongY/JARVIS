@@ -1,6 +1,23 @@
 # 원 계획서 대비 완료 감사
 
-최종 갱신: 2026-10-06
+최종 갱신: 2026-10-07
+
+## 2026-10-07 음성·사용자 검증 갱신
+
+- 전체 회귀는 **800 collected, 797 passed, 3 skipped**, line coverage 83%, Ruff clean,
+  mypy strict 124 source files다.
+  소스 실행 기준 doctor 15/15, Credential preflight 3/3, 13-capability service `CREATED`와
+  `capture_running=false`를 재확인했다.
+- 실제 기본 마이크에서 frame과 음성 energy가 들어오는 것은 확인했지만 공식 영어
+  `hey_jarvis_v0.1`은 한국어식·영어식 발화를 모두 감지하지 못했다. 실패 지점은 마이크나 STT보다
+  호출어 모델이다.
+- 동의·SHA-256이 결합된 로컬 WAV만 읽는 FAR/FRR 평가기와 CLI를 추가했다. 추론 실패를 분모에서
+  빼지 않고 양성 표본은 FN, 비호출어 표본은 FP로 보수적으로 계산한다.
+- `wakeword-forge` 계열 후보용 RepCNN 어댑터와 별도 평가 CLI를 추가했다. 해시·크기·ONNX 입출력,
+  3초 창과 400 ms hop을 검증하지만 제품 기본 경로에는 연결하지 않았다. 공개 `okay-hermes`의 무음
+  점수 `0.624035120`과 합성 CLI FAR 0/FRR 1은 연결 증거일 뿐 한국어 성능 근거가 아니다.
+- 실제 고정 한국어 TTS 스피커 재생과 Windows Hello `VERIFIED`는 PASS했다. TTS 사용자 평가는
+  3/5이며 번역기 같은 말투를 개선해야 한다. 실제 동의 한국어 corpus와 맞춤 `Jarvis` 모델은 없다.
 
 ## 2026-10-06 재검증
 
@@ -28,14 +45,14 @@
 
 | 원 계획 요구 | 상태 | 현재 직접 증거 | 완료에 부족한 증거 |
 |---|---|---|---|
-| Wake word → VAD → local STT | 부분 | strict local bundle, 실제 무음 ONNX/Whisper inference, bounded pipeline | 한국어 `자비스` 전용 모델, 실제 발화 FAR/FRR, 사용자 동의 마이크 capture |
+| Wake word → VAD → local STT | 부분 | strict local bundle, 실제 mic frame/energy, 영어 모델 실제 미검출 진단, 동의·hash 결합 FAR/FRR CLI, pinned RepCNN 후보 어댑터, 실제 무음 ONNX/Whisper inference | 동의 한국어 corpus, 기준을 통과한 `자비스` 맞춤 모델과 실제 FAR/FRR·CER/WER |
 | Intent/addressedness gate | 부분 | 로컬 STOP, strict NIM proposal, 15개 정책 계약, command/quote/negation/hypothetical 차단 | 실제 한국어 corpus Macro-F1·class precision/recall·calibration |
 | 기본 Context | 부분 | exact path/hash foreground app, 안정 표본, 제품 서비스에 연결된 privacy-minimized Planner context(`foreground_app_id`, `foreground_identity_verified`만 노출), foreground/focus WinEvent source, exact event snapshot binding, overflow fail-closed, UIA failure-bound three-purpose selective capture gate | 실제 사용자 앱 장시간 event 운용과 task/session 종합 context |
 | Typed Planner | 부분 | strict JSON, duplicate/NaN/size/schema/capability 검증, 사용자 goal 강제 결합 | 현재 NIM endpoint의 반복 timeout 해소와 실제 task-set planning 성공률 |
 | Capability Registry | 완료 | immutable registry, risk floor, executor allowlist, typed argument/postcondition contract | 새 capability 추가 시 동일 계약 유지 |
 | GREEN/YELLOW/RED 정책 | 완료 | context가 risk를 낮출 수 없는 deterministic policy와 per-action 재검사 | 실제 participant confirmation burden 결과는 연구 항목 |
 | Approval UI | 부분 | fail-closed local UI, exact-action token, R4 strong-auth coordinator | 실제 사용자 UI usability, timeout/deny 현장 시험 |
-| Windows Hello | 미검증 | HWND interop helper build 및 manifest/hash IPC 검증 | 사용자 참여 `VERIFIED` 성공과 배포 코드 서명 |
+| Windows Hello | 부분 | HWND interop helper build·manifest/hash IPC 검증과 사용자 참여 `VERIFIED` PASS | 별도 배포용 apphost 코드 서명 |
 | Native/API execution | 부분 | system info, file list, process launch, Settings URI, file move/trash, bounded volume actual smoke, memory→hash-pinned PDF→Edge window actual fixture smoke, R3 message mock/receipt | install, 실제 message backend와 S02/S03/S06 반복 평가 |
 | Restricted PowerShell | 완료(현재 범위) | 고정 read-only script만 허용, 임의 shell/인자 실행 없음 | 새 PowerShell capability마다 별도 고정 script와 검증 필요 |
 | UI Automation | 부분 | exact selector observation, authorized session, 실제 Notepad replace/hash | 추가 앱 변경 adapter와 UIA event subscription |
@@ -45,7 +62,7 @@
 | Structured audit | 완료(로컬 경계) | redaction, protected ACL, lock, rotation, fsync, SHA-256 chain 및 변조 탐지 | 현재 사용자 계정 침해에 견디는 별도 HMAC/서명 키 |
 | Semantic/episodic memory | 완료(기본 범위) | bounded SQLite/FTS5, 30일 retention, credential/HIGH 차단, ACL, 제품 `memory.search` executor와 독립 verifier, 승인 전 DB를 만들지 않는 lazy backend, 실제 DB smoke | 사용자 장기 선호·procedural memory는 P1/P2 |
 | 항상대기 통합 runtime | 부분 | 장기 frame pump와 비동기 planning/execution worker를 결합하고 작업 중 exact STOP만 동시 수락 | 실제 마이크 장시간 운용, 장치 복구와 STOP latency |
-| Voice feedback/TTS | 부분 | 고정 문구만 허용, SAPI probe, 실제 한국어 WAV, 실행 중 STOP | 사람 청취 발음 품질·실제 speaker 출력 |
+| Voice feedback/TTS | 부분 | 고정 문구만 허용, SAPI probe, 실제 한국어 WAV·speaker 출력 PASS, 실행 중 STOP | 사용자 평점 3/5의 번역기 같은 말투 개선과 재평가 |
 
 ## P0 대표 앱
 
@@ -71,19 +88,21 @@
 
 ## 현재 릴리스 증거
 
-- Python 전체: 766 passed, 3 skipped, line coverage 83%.
-- Ruff clean, mypy strict 123 source files.
+- Python 전체: 797 passed, 3 skipped, line coverage 83%.
+- Ruff clean, mypy strict 124 source files.
 - Windows Hello helper build: warning 0, error 0.
 - `javis doctor`: SAPI와 optional pycaw를 포함한 15개 check PASS.
-- 실제 wheel: 127 entry, B0/B1/P1/P2 condition runner, 현재-PC 70/70셀 경로, signed snapshot exact-cell consumer, privacy-minimized product context, lazy `memory.search`와 Credential Manager product/tray/autostart CLI를 포함한다. 294,136바이트이며 SHA-256은 `86256abc55e715f9d6748bb3dd385030f95d989a8e599d99973bcee3f4a937c9`이다. 새 격리 venv에서 doctor 15/15, Credential `PRESENT`, preflight 3/3 PASS와 13-capability service `CREATED`를 재현했다.
-- current frozen one-folder는 1,826-entry manifest exact 검증을 통과했고 package manifest SHA-256은 `4127ddbac7d2fee49d6d392031c4f7dac8766d343820d9ec1931ef31ea402abc`다. 260,300,800-byte per-user Setup SHA-256은 `3690062f16e7172fb96e372f603d736f2e2fe81323f3cbb55176070b17c70c22`이며 sidecar와 일치한다. 실제 최초 설치, 설치본 manifest, Credential `PRESENT`, preflight 3/3, 13-capability service `CREATED`, autostart `ABSENT`를 재현했다. console/tray/Setup은 Authenticode 미서명이므로 공개 배포 완료는 아니다.
+- 새 wheel은 128 entry, 299,655바이트, SHA-256 `01924a9db4e2321cc6db9d1057b36f8421c5e55656b03d0d5854519ceaa40a48`이다. 빈 venv에 필수 dependency와 함께 설치해 RepCNN 평가 CLI와 adapter import를 재현했다.
+- current frozen one-folder는 1,826-entry manifest exact 검증을 통과했고 package manifest SHA-256은 `6aed3aba7ed881b5a7fa5715867a3df73a0bc99a577ad28a0948684f7181ccb0`다. 새 CLI, frozen doctor, Credential `PRESENT`, preflight 3/3과 13-capability service `CREATED`를 재현했다. 260,321,280-byte per-user Setup SHA-256은 `ff1d143f2c35d3158f361ff92c53ba46ae05ce4b3b33569999641848f41362ab`이며 sidecar와 일치한다. 새 Setup은 생성·감사했지만 실제 설치는 아직 실행하지 않았다. 이전 산출물의 최초 설치·manifest·preflight·autostart `ABSENT` 증거는 유지된다. console/tray/Setup은 Authenticode 미서명이므로 공개 배포 완료는 아니다.
 - 실제 local voice composition smoke: openWakeWord와 faster-whisper bundle 초기화 및 `VoicePipeline` 조립 PASS, microphone 미개방.
 - synthetic closed-loop product composition: wake/VAD/STT, typed intent/plan, policy, executor, verifier, audit, 완료 event PASS; 외부효과 0.
 - 실제 product-host preflight: config, protected NIM secret, doctor 3/3 PASS, `ready=true`, exit 0. 마이크·모델 inference·앱·HUD는 열지 않음.
 - 실제 product-service check: Windows adapter 13개(`memory.search` 포함), privacy-minimized foreground context, local voice/NIM/approval/Hello/audit/runtime/capture 조립 PASS, capture 미실행, host `CREATED`.
 - 설치 wheel 실제 `explorer.folder.open`: exact workspace folder, digest binding, 경로 비노출, 독립 Shell COM 검증과 실제 HWND 소멸 확인을 연속 3/3 PASS.
 - 실제 `browser.navigate`: Chrome `https://github.com` 새 창의 PID/HWND/image/creation-time과 URL digest 독립 검증 PASS, exact HWND `WM_CLOSE` 정리 PASS. Edge는 단일 새 창을 증명하지 못해 fail-closed.
-- 사용자 참여 검증 CLI: 단계별 fresh consent, 비동의 callback 0회, protected JSONL과 raw audio/transcript 비저장 계약 PASS. 비대화형 actual smoke는 4개 모두 SKIPPED이며 실제 장치 PASS를 대체하지 않음.
+- 사용자 참여 검증 CLI: 단계별 fresh consent, 비동의 callback 0회, protected JSONL과 raw audio/transcript
+  비저장 계약 PASS. 실제 TTS speaker와 Windows Hello는 PASS했고, mic와 STOP은 호출어 미검출로 FAIL했다.
+  비대화형 smoke의 4개 SKIPPED 결과는 이 실제 사용자 참여 결과와 별도로 유지한다.
 - 실제 NIM read-only 폐루프: 한국어 명령 → COMMAND gate → `system.info.read` typed plan → policy/executor/verifier → `ALL_ACTIONS_VERIFIED`, audit 5 records, 외부효과 0.
 - 종합 safe evaluation: 8 PASS, 7 NOT_RUN, `all_required_evidence_complete=false`.
 - 원 계획서 릴리스 전 자동화 체크리스트 13개는 `RELEASE_CHECKLIST_EVIDENCE.md`에서 각각 직접
@@ -93,11 +112,12 @@
 
 ## 다음 완료 순서
 
-1. 상시 capture composition의 실제 마이크 장시간 실행과 concurrent STOP latency를 측정한다.
-2. 실제 사용자 앱별 semantic Vision profile과 독립 postcondition을 추가한다.
-3. 내보낸 50개 exact-cell 요청을 외부 snapshot-VM harness에서 실행하고 서명 evidence를 수집한다.
-4. 사용자 참여형 Hello, microphone, 한국어 wake/STT/TTS 평가.
-5. 30~50 task 및 B0/B1/P1/P2 실제 데이터 수집 후 통계 보고서 생성.
+1. 동의된 한국어 호출어·비호출어 corpus를 만들고 맞춤 `Jarvis` 후보를 같은 FAR/FRR 기준으로 비교한다.
+2. 기준을 통과한 호출어 모델로 상시 capture의 실제 장시간 운용과 concurrent STOP latency를 측정한다.
+3. TTS 말투를 개선하고 사용자 재평가를 수행한다.
+4. 실제 사용자 앱별 semantic Vision profile과 독립 postcondition을 추가한다.
+5. 내보낸 50개 exact-cell 요청을 외부 snapshot-VM harness에서 실행하고 서명 evidence를 수집한다.
+6. 30~50 task 및 B0/B1/P1/P2 실제 데이터 수집 후 통계 보고서 생성한다.
 
 따라서 현재 코드는 안전 제어 prototype으로는 강한 증거가 있지만, 원 계획서가 말한 항상대기
 완성품과 졸업논문 실험 결과까지 완료됐다고 판정할 수 없다.

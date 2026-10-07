@@ -1449,4 +1449,18 @@ NIM 결과는 그대로 반영하지 않았다. 감사 과정에서 다음 문�
   직렬화에 맞춰 수정했다.
 - 합성 무음 corpus와 공개 예제 모델로 새 CLI를 실제 실행해 inference failure 없이 typed FAR/FRR
   보고서가 생성되는 것을 확인했다. 제품 기본 설정·모델·사용자 음성은 사용하지 않았다. 전체 회귀는
-  793 passed, 3 skipped, Ruff clean, mypy strict 124 source files다.
+  797 passed, 3 skipped, line coverage 83%, Ruff clean, mypy strict 124 source files다.
+- NIM에 최신 음성·Hello·TTS 증거를 제공해 완료 감사표 갱신 초안을 받았다. 성능을 주장하지 않는
+  상태 구분과 실제 검증 요약은 채택했다. 맞춤 RepCNN을 다음 단계에서 곧바로 기본 경로에 연결하라는
+  순서는 폐기하고, 동의 corpus의 FAR/FRR 기준을 먼저 통과해야만 연결을 검토하도록 고쳤다. 오래된
+  Hello 미검증·장치 4개 SKIPPED 문구도 실제 사용자 참여 결과와 비대화형 smoke를 구분해 수정했다.
+- NIM에 installer의 고정 package/Setup 경로를 안전하게 확장하는 초안을 요청했다. custom path와
+  non-overwrite 방향은 채택했지만 실제 `ReleaseSigner`를 문자열로 바꾸고 함수 반환형을 훼손했으며,
+  절대 경로가 포함된 예외를 제안해 그대로 사용하지 않았다. Codex가 안정 오류 코드와 기존 반환 계약을
+  보존한 경로 resolver, symlink·확장자·부모·기존 Setup/sidecar 검증과 단위시험을 구현했다.
+- 새 wheel은 128 entry, 299,655바이트, SHA-256
+  `01924a9db4e2321cc6db9d1057b36f8421c5e55656b03d0d5854519ceaa40a48`이고 격리 설치에서 새 CLI와
+  adapter import가 PASS했다. 1,826-entry one-folder manifest SHA-256은
+  `6aed3aba7ed881b5a7fa5715867a3df73a0bc99a577ad28a0948684f7181ccb0`, Setup은 260,321,280바이트,
+  SHA-256 `ff1d143f2c35d3158f361ff92c53ba46ae05ce4b3b33569999641848f41362ab`이다. 실제 key·`NIM.txt`·공개
+  후보 ONNX는 package/Setup에서 0건이고, manifest/Setup hash PASS와 세 signature FAIL을 확인했다.

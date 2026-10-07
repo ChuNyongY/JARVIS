@@ -92,8 +92,9 @@ Wake/VAD/STT
 - actual reversible S01 Chrome process/window 및 S03 memory→PDF→Edge window smoke
 - 논문 지표 평가 하네스와 안전한 system-info smoke CLI
 
-아직 실기기 검증이 남은 범위는 실제 한국어 wake word/STT 정확도와 TTS 발음·스피커 재생, Windows Hello의 성공 인증
-응답, 추가 앱별 변경 adapter, Vision fallback, snapshot VM 위험 작업, 고급 procedural memory다.
+실기기에서 TTS 스피커 재생과 Windows Hello 성공 인증은 PASS했다. 남은 범위는 실제 한국어
+wake word/STT 정확도, 평점 3/5인 TTS 말투 개선, 추가 앱별 변경 adapter, Vision fallback,
+snapshot VM 위험 작업, 고급 procedural memory다.
 
 ## 안전 불변식
 
@@ -155,6 +156,7 @@ python -m javis_core.cli validate-integrated-scenarios evaluation/integrated_sce
 python -m javis_core.cli validate-benchmark-tasks evaluation/benchmark_tasks.json evaluation/integrated_scenarios.json
 python -m javis_core.cli analyze-benchmark-results evaluation/benchmark_tasks.json evaluation/integrated_scenarios.json C:\absolute\benchmark-observations.json C:\absolute\benchmark-evidence
 python -m javis_core.cli evaluate-wakeword-corpus C:\absolute\wake-corpus\manifest.json C:\absolute\wake-corpus models/openwakeword/manifest.json --threshold 0.5
+python -m javis_core.cli evaluate-repcnn-wakeword-corpus C:\absolute\wake-corpus\manifest.json C:\absolute\wake-corpus C:\absolute\model\jarvis.onnx <64자리-model-sha256> --threshold 0.7
 python -m javis_core.cli run-host-safe-scenarios evaluation/integrated_scenarios.json (Get-Location).Path
 python -m javis_core.cli run-mock-scenarios evaluation/integrated_scenarios.json
 python -m javis_core.cli run-fixture-scenarios evaluation/integrated_scenarios.json
@@ -172,7 +174,7 @@ python tools/build_windows_installer.py
 - Phase 0: 타입 계약, registry, policy, approval token, 단위 테스트 — 완료
 - Phase 1: mock executor와 verifier, 상태 머신, 구조화 audit log — 완료
 - Phase 2: read-only Native API와 제한된 PowerShell adapter — 완료
-- Phase 3: UIA, 로컬 STOP, 승인 UI — 부분 완료(Hello helper·Edge/Terminal 관찰 완료, 성공 인증·변경 adapter·Vision 미완료)
+- Phase 3: UIA, 로컬 STOP, 승인 UI — 부분 완료(Hello 실제 인증·Edge/Terminal 관찰 완료, 추가 변경 adapter·Vision 미완료)
 - Phase 4: 한국어 음성 파이프라인, 고장 주입, B0/B1/P1/P2 실험 — 부분 완료(실기기·참가자 평가 미완료)
 
 상세 비교와 설계는 [차별성 문서](docs/DIFFERENTIATION.md), [아키텍처 문서](docs/ARCHITECTURE.md),
