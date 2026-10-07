@@ -77,6 +77,20 @@ CaptureSourceFactory = Callable[[], CaptureFrameSource]
 CaptureReadiness = Callable[[WakeWordCaptureSample], bool]
 FileHardener = Callable[[Path], None]
 
+_DISTANCE_GUIDANCE = {
+    WakeWordDistanceBand.UNSPECIFIED: "미지정",
+    WakeWordDistanceBand.NEAR_0_5M: "약 0.5 m",
+    WakeWordDistanceBand.MID_1_2M: "1~2 m",
+    WakeWordDistanceBand.FAR_3_5M: "3~5 m",
+}
+_NOISE_GUIDANCE = {
+    WakeWordNoiseCondition.UNSPECIFIED: "미지정",
+    WakeWordNoiseCondition.QUIET: "조용함",
+    WakeWordNoiseCondition.SPEECH: "사람 말소리",
+    WakeWordNoiseCondition.MUSIC: "음악",
+    WakeWordNoiseCondition.HOUSEHOLD: "생활 소음",
+}
+
 
 class ConsoleWakeWordCaptureConsent:
     """Require a fresh exact phrase before any microphone source can be created."""
@@ -139,8 +153,11 @@ class ConsoleWakeWordCaptureReadiness:
             if sample.target_present
             else "'헤이 자비스'를 말하지 말고 평소 문장이나 주변 소리를 들려주세요"
         )
+        session = "미지정" if sample.session_index == 0 else str(sample.session_index)
         self._output.write(
-            f"[{sample.sample_id}] {guidance}. 녹음 직전에 '준비'를 입력하세요. "
+            f"[{sample.sample_id}] 조건: 거리 {_DISTANCE_GUIDANCE[sample.distance_band]}, "
+            f"소음 {_NOISE_GUIDANCE[sample.noise_condition]}, 세션 {session}. "
+            f"{guidance}. 녹음 직전에 '준비'를 입력하세요. "
             "그 외 입력은 전체 수집을 취소합니다: "
         )
         self._output.flush()

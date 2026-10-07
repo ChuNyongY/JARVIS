@@ -1525,3 +1525,30 @@ NIM 결과는 그대로 반영하지 않았다. 감사 과정에서 다음 문�
   SHA-256은 `76c35518ec503c196d7a70de9a9a00538438ff523db8dec9a6a6e33bd843f018`, Setup SHA-256은
   `18630f573286f9879f1ae15ff5458df0a1e8c96f0ce581f484016322ccfcfdaf`다. frozen 보정 결과는 소스와
   동일했고, package/Setup 1,828개 파일의 실제 key exact match와 package `NIM.txt`는 0건이다.
+
+## 2026-10-07 실제 호출어 pilot 문서 초안 감사
+
+- 실제 사용자 음성, 경로, 동의 식별자와 API key를 제외하고 4표본의 형식·신호·집계 점수만
+  NIM에 제공해 상태 문서 초안을 요청했다.
+- 첫 `z-ai/glm-5.3` 요청은 120초 read timeout으로 끝났다. 범위를 줄인
+  `z-ai/glm-5.3-flash` 요청은 응답했지만 Windows 콘솔 문자 인코딩이 손상돼 문장을 검증할 수
+  없었다. UTF-8을 강제한 재요청도 60초 read timeout으로 끝났다.
+- 손상된 문장을 추측해 복구하거나 채택하지 않았다. NIM이 요구받은 수집·결과·남은 일의 문서
+  구조만 참고하고, Codex가 실제 manifest, WAV metadata, ACL, detector 출력과 calibration 출력을
+  다시 대조해 검증 가능한 수치만 기록했다.
+- 공식 영어 모델의 TP 0/TN 2/FP 0/FN 2, FAR 0/FRR 1과 0.99 동률 선택을 성능 개선으로 표현하지
+  않았다. 4표본은 절차 pilot이며 별도 보정·최종시험 corpus와 한국어 맞춤 후보가 남았다고 명시했다.
+- 실제 수집에서 거리·소음·세션 안내가 빠진 문제를 발견해 NIM `z-ai/glm-5.3-flash`에 최소 코드·시험
+  diff를 요청했다. 응답은 기존 enum을 재사용하지 않고 같은 역할의 새 enum을 만들었으며 클래스 이름도
+  readiness callable과 충돌했고, noise 표 중간에서 잘렸다. 그대로 채택하지 않았다.
+- 고정 한국어 label 표라는 방향만 참고했다. Codex가 기존 `WakeWordDistanceBand`와
+  `WakeWordNoiseCondition`을 그대로 사용해 계획 문자열 주입 없이 조건을 표시하고, 세션 0은
+  `미지정`으로 처리했다. 실제 pilot 두 조건과 기존 exact `준비` 동작을 시험했으며 전체 회귀는
+  826 passed, 3 skipped, coverage 83%, Ruff clean, mypy strict 126 source files다.
+- 반영 wheel은 130 entry, 307,559바이트, SHA-256
+  `0ec1f27d267a85059ddf4bf987f81c537280c515170148d70d4cb5e99642db72`이며 빈 venv 조건 안내 smoke가
+  통과했다. one-folder manifest SHA-256은
+  `d1203f8456718ab130523966b545fce1070a98789d523652252d58d4432d8fa0`, Setup SHA-256은
+  `3f278b54d655577cf0cb53f4bdc8f222c325b36323b9176755c35f2ecc0bc26f`다. exact manifest,
+  frozen 비동의 종료, Credential preflight 3/3, 13-capability service 조립과 실제 key 0건을 확인했다.
+  console/tray/Setup은 인증서가 없어 `NotSigned`다.

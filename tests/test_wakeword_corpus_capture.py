@@ -311,3 +311,44 @@ def test_console_readiness_requires_exact_korean_acknowledgement() -> None:
     assert readiness(plan().samples[0])
     assert not readiness(plan().samples[1])
     assert "헤이 자비스" in output.getvalue()
+    assert "거리 미지정, 소음 미지정, 세션 미지정" in output.getvalue()
+
+
+@pytest.mark.parametrize(
+    ("distance", "noise", "session_index", "expected"),
+    [
+        (
+            WakeWordDistanceBand.NEAR_0_5M,
+            WakeWordNoiseCondition.QUIET,
+            1,
+            "거리 약 0.5 m, 소음 조용함, 세션 1",
+        ),
+        (
+            WakeWordDistanceBand.FAR_3_5M,
+            WakeWordNoiseCondition.SPEECH,
+            2,
+            "거리 3~5 m, 소음 사람 말소리, 세션 2",
+        ),
+    ],
+)
+def test_console_readiness_displays_fixed_korean_capture_condition(
+    distance: WakeWordDistanceBand,
+    noise: WakeWordNoiseCondition,
+    session_index: int,
+    expected: str,
+) -> None:
+    output = io.StringIO()
+    readiness = ConsoleWakeWordCaptureReadiness(
+        input_stream=TtyInput("준비\n"),
+        output_stream=output,
+    )
+    sample = WakeWordCaptureSample(
+        sample_id="condition-sample",
+        target_present=True,
+        distance_band=distance,
+        noise_condition=noise,
+        session_index=session_index,
+    )
+
+    assert readiness(sample)
+    assert expected in output.getvalue()

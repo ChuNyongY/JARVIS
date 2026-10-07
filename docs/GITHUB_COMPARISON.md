@@ -1,6 +1,6 @@
 # GitHub JARVIS 계열과의 차이
 
-최초 확인일은 2026-10-03이고 공식 README 재확인일은 2026-10-05이다. GitHub에는 동일·유사 이름의 프로젝트가 여러 개라서 “현재 GitHub의
+최초 확인일은 2026-10-03이고 공식 README와 호출어 후보 재확인일은 2026-10-07이다. GitHub에는 동일·유사 이름의 프로젝트가 여러 개라서 “현재 GitHub의
 JAVIS AI”만으로 단일 저장소를 확정할 수 없다. 이 문서는 계획서와 가장 가까운 Windows 11,
 상시 음성, 로컬 모델, 실제 PC 도구 구성을 가진
 [`D3v0ps/JARVIS`](https://github.com/D3v0ps/JARVIS)를 주 비교 대상으로 삼는다. 기본적으로 행동을
@@ -17,6 +17,14 @@ arbitrary `cmd.exe`/PowerShell, model-written Python skill을 사용자 권한�
 OS sandbox가 없으며, timeout된 skill thread를 종료할 수 없고 audit에 tool argument 원문이 남는다고
 명시한다. 따라서 아래 차이는 단순히 “안전 기능 유무”가 아니라 승인 binding, 실행 격리, 독립
 postcondition, 개인정보 최소화와 실험 증거의 강도 차이다.
+
+2026-10-07 추가 확인에서 [`ecandersonjr/Jarvis`](https://github.com/ecandersonjr/Jarvis)는
+`models/hey_jarvis_v0.1.onnx`를 별도 학습 모델이라고 설명하지만, commit
+`7b91ecf27922f816a9aff6356e0fc3535972e55a`의 파일 SHA-256은
+`94a13cfe60075b132f6a472e7e462e8123ee70861bc3fb58434a73712ee0d2cb`로 현재 JARVIS-PC가 고정한
+공식 openWakeWord 파일과 정확히 같았다. 저장소 루트에는 별도 라이선스 파일도 없었다. 따라서 이
+파일을 새로운 한국어 후보나 재배포 가능한 독립 모델로 간주하지 않았고, 같은 파일의 중복 평가는
+생략했다.
 
 ## 결론
 
@@ -37,7 +45,7 @@ Windows host를 갖췄지만 잘못 들은 말과 위험한 도구 호출을 어
 | 메모리 | `memory.json` 사실을 prompt에 주입 | bounded SQLite FTS, source/confidence/sensitivity/expiry, credential-like 값 거부 |
 | 로그·개인정보 | transcript, tool arguments, refusals, latency를 로그에 기록한다고 문서화 | chain-hashed JSONL, credential redaction, 여러 adapter의 path/content 비공개 영수증 |
 | 위험 시험 | 실제 PC에서 guarded power/file/PowerShell 도구 제공 | 영구삭제·종료·설치·reset commit은 snapshot VM 전용; 서명된 복원 증거 없이는 미완료 처리 |
-| 연구 평가 | 안전 gate 중심 pytest와 사용자 기능 시나리오 | S01~S15 격리 manifest, B0/B1/P1/P2 exact-grid collector·condition runner·P2 recovery runner·서명된 snapshot-cell consumer·분석기, 현재 737 passed/3 skipped·83% coverage, 현재-PC 70/70셀 수집 |
+| 연구 평가 | 안전 gate 중심 pytest와 사용자 기능 시나리오 | S01~S15 격리 manifest, B0/B1/P1/P2 exact-grid collector·condition runner·P2 recovery runner·서명된 snapshot-cell consumer·분석기, 현재 826 passed/3 skipped·83% coverage, 현재-PC 70/70셀 수집 |
 
 보조 기준 Axx33284/JARVIS와 비교하면 양쪽 모두 human approval과 fail-closed gate를 갖지만,
 JARVIS-PC는 임의 shell과 runtime-generated Python skill을 제품 capability에서 제외하고 action의
@@ -88,5 +96,7 @@ self-improving skill library와 폭넓은 일상 도구에서 더 완성된 제�
 - Axx33284 README는 로컬 Windows 도구 73개, standard에서 irreversible 확인, strict에서 모든
   destructive 확인, full에서 무확인을 선택하는 gate와 arbitrary shell의 비-sandbox 한계를 명시한다.
   JARVIS-PC는 사용자 설정과 무관하게 risk별 최소 승인 강도를 낮출 수 없다는 점에서 대비된다.
+- ecandersonjr/Jarvis의 README와 실제 ONNX hash를 함께 확인했다. README의 “custom-trained” 설명만
+  믿지 않고 byte identity와 재배포 조건을 별도로 검사한 결과이므로 한국어 후보로 채택하지 않았다.
 - 본 비교는 공개 README와 저장소 구조를 기준으로 한 것이다. 상대 저장소의 모든 구현 라인을
   보안 감사하거나 실제 하드웨어에서 재현한 결과는 아니다.

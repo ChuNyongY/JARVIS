@@ -4,19 +4,29 @@
 
 ## 2026-10-07 최신 재검증 요약
 
-전체 회귀는 824 passed, 3 skipped, line coverage 83%, Ruff clean, mypy strict 126 source files다.
+전체 회귀는 826 passed, 3 skipped, line coverage 83%, Ruff clean, mypy strict 126 source files다.
 소스 doctor 15/15, Credential preflight 3/3과 13-capability service `CREATED`를 재확인했다.
 
-새 wheel은 130개 entry, 307,300바이트, SHA-256
-`b427764fca7843ca833ac785fb69f156f4ed6b570396e96c9307037bdb54768f`이며 빈 venv에 필수
-dependency와 함께 설치한 뒤 호출어 보정 CLI와 공개 API import가 PASS했다. 새 one-folder는
-1,826 manifest entry, manifest 포함 520,553,537바이트이고 manifest SHA-256은
-`76c35518ec503c196d7a70de9a9a00538438ff523db8dec9a6a6e33bd843f018`이다. exact manifest,
-frozen 합성 보정과 수집 CLI 비동의 안전 종료, doctor, Credential `PRESENT`, preflight 3/3,
+사용자 동의 아래 호출어 예비 표본 4개를 실제 마이크로 수집했다. 각 WAV는 16 kHz mono signed
+16-bit PCM, 3.2초이며 manifest의 SHA-256과 모두 일치했다. 폴더와 다섯 파일은 Windows ACL
+상속이 차단됐고, 음성 신호는 모두 0이 아니며 clipping 비율은 0이었다. corpus manifest SHA-256은
+`8e45a2a70bb5962b6e984ba276083679fb0d2362b1f33295257df22115068eb1`이다.
+
+공식 영어 `hey_jarvis_v0.1`을 임계값 0.5로 평가한 결과는 TP 0, TN 2, FP 0, FN 2,
+추론 실패 0, FAR 0.0, FRR 1.0이었다. 0.50~0.99 보정 후보도 모두 FRR 1.0이라 안전 동률 규칙으로
+0.99가 선택됐지만 성능 개선은 아니다. 이 네 표본은 수집·무결성·평가 경로를 확인한 pilot이며,
+논문 성능 결론이나 제품 모델 채택 근거로 사용하지 않는다.
+
+새 wheel은 130개 entry, 307,559바이트, SHA-256
+`0ec1f27d267a85059ddf4bf987f81c537280c515170148d70d4cb5e99642db72`이며 빈 venv에 필수
+dependency와 함께 설치한 뒤 원거리·말소리·세션 조건 안내 공개 API smoke가 PASS했다. 새 one-folder는
+1,826 manifest entry, manifest 포함 520,554,511바이트이고 manifest SHA-256은
+`d1203f8456718ab130523966b545fce1070a98789d523652252d58d4432d8fa0`이다. exact manifest,
+frozen 수집 CLI 비동의 안전 종료, Credential `PRESENT`, preflight 3/3,
 13-capability service 조립이 PASS했다.
 
-새 Setup은 260,366,336바이트, SHA-256
-`18630f573286f9879f1ae15ff5458df0a1e8c96f0ce581f484016322ccfcfdaf`이고 sidecar와 일치한다.
+새 Setup은 260,362,240바이트, SHA-256
+`3f278b54d655577cf0cb53f4bdc8f222c325b36323b9176755c35f2ecc0bc26f`이고 sidecar와 일치한다.
 package/Setup 1,828개 파일에서 실제 NIM key exact match와 package `NIM.txt`는 0건이다. release audit은
 manifest와 Setup hash PASS, console/tray/Setup signature는 인증서 부재로 FAIL이다. 새 Setup은
 생성·감사까지만 했고 실제 설치 smoke는 아직 이전 2026-10-06 산출물의 증거만 유지된다.
@@ -239,7 +249,7 @@ Chrome 자동 업데이트로 발생한 등록 해시 drift를 수정했고, 최
 
 ## 아직 완료되지 않은 항목
 
-- 사용자 동의가 필요한 실제 마이크 녹음 smoke test와 한국어 음성 데이터 평가
+- 더 큰 별도 보정·최종시험 한국어 corpus와 기준을 통과한 맞춤 호출어 모델 평가
 - 상시 캡처 composition의 실제 마이크 장시간 운용과 실제 STOP latency 측정
 - 한국어 TTS 익명 후보의 사용자 자연스러움·명료도 평가와 채택 후보의 실제 스피커 재검증
 - Windows Hello helper의 별도 배포용 코드 서명
@@ -252,7 +262,7 @@ Chrome 자동 업데이트로 발생한 등록 해시 drift를 수정했고, 최
 
 ## 검증 해석
 
-현재 전체 회귀 검증은 824 passed, 3 skipped, line coverage 83%, Ruff clean,
+현재 전체 회귀 검증은 826 passed, 3 skipped, line coverage 83%, Ruff clean,
 mypy strict 126 source files다. Windows Hello helper는 경고 0/오류 0으로 재빌드됐고 source doctor 15개 항목은
 모두 PASS했다. Windows Credential Manager의 고정 target은 실제 `PRESENT`이고 Credential product-host
 preflight도 config/secret/doctor 3/3 PASS했다. 배포 대상 실제 key exact-match scan도 통과했다.
@@ -492,3 +502,13 @@ recovery는 파일을 이동하거나 삭제하지 않고, 관찰된 상태에 �
   닫힌다. 합성 무음 양성·비호출어 각 1개에서 공식 영어 모델은 모든 후보 FAR 0/FRR 1이라 0.99가
   기계적으로 선택됐지만, 호출어가 없는 양성 표본이므로 품질 근거가 아니다. 최신 전체 회귀는
   824 passed, 3 skipped다.
+- 사용자 동의 아래 0.5 m 조용함과 3~5 m 사람 말소리 조건에서 양성·비호출어 각 1개, 총 4개를
+  실제 수집했다. WAV 형식·길이·hash·protected ACL·nonzero 신호·clipping 0을 확인했다. 공식 영어
+  모델의 임계값 0.5 결과는 TP 0/TN 2/FP 0/FN 2, FAR 0.0/FRR 1.0이었다. 양성 최대 점수는
+  `0.396607757`, `0.068618000`으로 허용 임계값 하한 0.5보다 낮았다. 이 결과로 실제 수집 경로는
+  검증됐지만 현재 모델은 이번 한국어 pilot 조건에서 실사용 기준을 충족하지 못했으며, 4표본 결과를
+  일반적인 성능 결론으로 확대하지 않는다.
+- 실제 수집 중 CLI가 계획의 거리·소음·세션 조건을 표시하지 않는 운용 결함을 발견했다. readiness
+  화면이 기존 enum을 고정 한국어 문구로 표시하도록 수정했고, 미지정·근거리 조용함·원거리 말소리
+  조건과 기존 exact `준비` 계약을 회귀시험으로 고정했다. 최종 전체 회귀는 826 passed,
+  3 skipped다.

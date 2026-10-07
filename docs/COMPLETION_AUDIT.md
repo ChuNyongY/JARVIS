@@ -4,7 +4,7 @@
 
 ## 2026-10-07 음성·사용자 검증 갱신
 
-- 전체 회귀는 **827 collected, 824 passed, 3 skipped**, line coverage 83%, Ruff clean,
+- 전체 회귀는 **829 collected, 826 passed, 3 skipped**, line coverage 83%, Ruff clean,
   mypy strict 126 source files다.
   소스 실행 기준 doctor 15/15, Credential preflight 3/3, 13-capability service `CREATED`와
   `capture_running=false`를 재확인했다.
@@ -17,6 +17,10 @@
   전체 수치와 같은 실패 산입 원칙으로 조건별 FAR/FRR을 낸다. 1.0 자료는 미지정 조건으로 읽는다.
 - 별도 보정 corpus에서 FAR 상한을 먼저 만족시키고 FRR·FAR·높은 임계값 순으로 0.50~0.99 중 하나를
   고정하는 offline calibration CLI를 추가했다. 가능한 후보가 없으면 임계값을 만들지 않는다.
+- 사용자 동의 아래 실제 4표본 pilot을 수집했다. WAV 형식·길이·hash·protected ACL·nonzero
+  신호·clipping 0이 모두 확인됐지만, 공식 영어 모델의 임계값 0.5 결과는 TP 0/TN 2/FP 0/FN 2,
+  FAR 0.0/FRR 1.0이었다. 따라서 실제 수집·평가 경로는 직접 입증됐지만 현재 모델은 이번 pilot
+  조건에서 기준 미달이다. 표본 수가 너무 작으므로 논문 성능 결론에는 쓰지 않는다.
 - `wakeword-forge` 계열 후보용 RepCNN 어댑터와 별도 평가 CLI를 추가했다. 해시·크기·ONNX 입출력,
   3초 창과 400 ms hop을 검증하지만 제품 기본 경로에는 연결하지 않았다. 공개 `okay-hermes`의 무음
   점수 `0.624035120`과 합성 CLI FAR 0/FRR 1은 연결 증거일 뿐 한국어 성능 근거가 아니다.
@@ -49,7 +53,7 @@
 
 | 원 계획 요구 | 상태 | 현재 직접 증거 | 완료에 부족한 증거 |
 |---|---|---|---|
-| Wake word → VAD → local STT | 부분 | strict local bundle, 실제 mic frame/energy, 영어 모델 실제 미검출 진단, 동의·hash 결합 FAR/FRR CLI, pinned RepCNN 후보 어댑터, 실제 무음 ONNX/Whisper inference | 동의 한국어 corpus, 기준을 통과한 `자비스` 맞춤 모델과 실제 FAR/FRR·CER/WER |
+| Wake word → VAD → local STT | 부분 | strict local bundle, 실제 4표본 동의 pilot의 WAV/hash/ACL 검증, 영어 모델 실측 TP 0/TN 2/FP 0/FN 2·FAR 0/FRR 1, 동의·hash 결합 FAR/FRR CLI, pinned RepCNN 후보 어댑터, 실제 ONNX/Whisper inference | 더 큰 독립 보정·최종시험 corpus, 기준을 통과한 `자비스` 맞춤 모델과 실제 FAR/FRR·CER/WER |
 | Intent/addressedness gate | 부분 | 로컬 STOP, strict NIM proposal, 15개 정책 계약, command/quote/negation/hypothetical 차단 | 실제 한국어 corpus Macro-F1·class precision/recall·calibration |
 | 기본 Context | 부분 | exact path/hash foreground app, 안정 표본, 제품 서비스에 연결된 privacy-minimized Planner context(`foreground_app_id`, `foreground_identity_verified`만 노출), foreground/focus WinEvent source, exact event snapshot binding, overflow fail-closed, UIA failure-bound three-purpose selective capture gate | 실제 사용자 앱 장시간 event 운용과 task/session 종합 context |
 | Typed Planner | 부분 | strict JSON, duplicate/NaN/size/schema/capability 검증, 사용자 goal 강제 결합 | 현재 NIM endpoint의 반복 timeout 해소와 실제 task-set planning 성공률 |
@@ -92,12 +96,12 @@
 
 ## 현재 릴리스 증거
 
-- Python 전체: 824 passed, 3 skipped, line coverage 83%.
+- Python 전체: 826 passed, 3 skipped, line coverage 83%.
 - Ruff clean, mypy strict 126 source files.
 - Windows Hello helper build: warning 0, error 0.
 - `javis doctor`: SAPI와 optional pycaw를 포함한 15개 check PASS.
-- 새 wheel은 130 entry, 307,300바이트, SHA-256 `b427764fca7843ca833ac785fb69f156f4ed6b570396e96c9307037bdb54768f`이다. 빈 venv에 필수 dependency와 함께 설치해 호출어 보정 CLI와 공개 API import를 재현했다.
-- current frozen one-folder는 1,826-entry manifest exact 검증을 통과했고 package manifest SHA-256은 `76c35518ec503c196d7a70de9a9a00538438ff523db8dec9a6a6e33bd843f018`이다. frozen 합성 보정, 비동의 안전 종료, doctor, Credential `PRESENT`, preflight 3/3과 13-capability service `CREATED`를 재현했다. 260,366,336-byte per-user Setup SHA-256은 `18630f573286f9879f1ae15ff5458df0a1e8c96f0ce581f484016322ccfcfdaf`이며 sidecar와 일치한다. 새 Setup은 생성·감사했지만 실제 설치는 아직 실행하지 않았다. 이전 산출물의 최초 설치·manifest·preflight·autostart `ABSENT` 증거는 유지된다. console/tray/Setup은 Authenticode 미서명이므로 공개 배포 완료는 아니다.
+- 새 wheel은 130 entry, 307,559바이트, SHA-256 `0ec1f27d267a85059ddf4bf987f81c537280c515170148d70d4cb5e99642db72`이다. 빈 venv에 필수 dependency와 함께 설치해 실제 pilot 조건 안내 공개 API smoke를 재현했다.
+- current frozen one-folder는 1,826-entry manifest exact 검증을 통과했고 package manifest SHA-256은 `d1203f8456718ab130523966b545fce1070a98789d523652252d58d4432d8fa0`이다. frozen 비동의 안전 종료, Credential `PRESENT`, preflight 3/3과 13-capability service `CREATED`를 재현했다. 260,362,240-byte per-user Setup SHA-256은 `3f278b54d655577cf0cb53f4bdc8f222c325b36323b9176755c35f2ecc0bc26f`이며 sidecar와 일치한다. 새 Setup은 생성·감사했지만 실제 설치는 아직 실행하지 않았다. 이전 산출물의 최초 설치·manifest·preflight·autostart `ABSENT` 증거는 유지된다. console/tray/Setup은 Authenticode 미서명이므로 공개 배포 완료는 아니다.
 - 실제 local voice composition smoke: openWakeWord와 faster-whisper bundle 초기화 및 `VoicePipeline` 조립 PASS, microphone 미개방.
 - synthetic closed-loop product composition: wake/VAD/STT, typed intent/plan, policy, executor, verifier, audit, 완료 event PASS; 외부효과 0.
 - 실제 product-host preflight: config, protected NIM secret, doctor 3/3 PASS, `ready=true`, exit 0. 마이크·모델 inference·앱·HUD는 열지 않음.
@@ -116,7 +120,7 @@
 
 ## 다음 완료 순서
 
-1. 동의된 한국어 호출어·비호출어 corpus를 만들고 맞춤 `Jarvis` 후보를 같은 FAR/FRR 기준으로 비교한다.
+1. 4표본 pilot과 분리된 더 큰 보정·최종시험 corpus를 수집하고 맞춤 `Jarvis` 후보를 같은 FAR/FRR 기준으로 비교한다.
 2. 기준을 통과한 호출어 모델로 상시 capture의 실제 장시간 운용과 concurrent STOP latency를 측정한다.
 3. TTS 말투를 개선하고 사용자 재평가를 수행한다.
 4. 실제 사용자 앱별 semantic Vision profile과 독립 postcondition을 추가한다.
