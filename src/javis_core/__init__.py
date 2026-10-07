@@ -599,6 +599,15 @@ from .wakeword_bundle import (
     WakeWordModelFile,
     load_wakeword_bundle,
 )
+from .wakeword_corpus_capture import (
+    ConsoleWakeWordCaptureConsent,
+    ConsoleWakeWordCaptureReadiness,
+    WakeWordCaptureError,
+    WakeWordCapturePlan,
+    WakeWordCaptureSample,
+    capture_wakeword_corpus,
+    load_wakeword_capture_plan,
+)
 from .wakeword_evaluation import (
     ResettableWakeWordDetector,
     WakeWordCorpusManifest,
@@ -1036,6 +1045,11 @@ __all__ = [
     "WakeWordCorpusManifest",
     "WakeWordCorpusReport",
     "WakeWordCorpusSample",
+    "ConsoleWakeWordCaptureConsent",
+    "ConsoleWakeWordCaptureReadiness",
+    "WakeWordCaptureError",
+    "WakeWordCapturePlan",
+    "WakeWordCaptureSample",
     "WakeWordModelFile",
     "WakeWordSampleReport",
     "ResettableWakeWordDetector",
@@ -1102,6 +1116,7 @@ __all__ = [
     "build_windows_policy_context_provider",
     "build_windows_planner_context_provider",
     "build_windows_product_service",
+    "capture_wakeword_corpus",
     "build_windows_product_service_with_secret_loader",
     "gate_scoped_policy_context_provider",
     "exact_mcnemar_p",
@@ -1124,6 +1139,7 @@ __all__ = [
     "load_voice_corpus_manifest",
     "load_wakeword_corpus_manifest",
     "load_wakeword_bundle",
+    "load_wakeword_capture_plan",
     "LOCAL_CONTROL_CAPABILITIES",
     "normalize_korean_transcript",
     "nim_credential_status",

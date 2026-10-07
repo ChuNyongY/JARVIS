@@ -4,8 +4,8 @@
 
 ## 2026-10-07 음성·사용자 검증 갱신
 
-- 전체 회귀는 **800 collected, 797 passed, 3 skipped**, line coverage 83%, Ruff clean,
-  mypy strict 124 source files다.
+- 전체 회귀는 **812 collected, 809 passed, 3 skipped**, line coverage 83%, Ruff clean,
+  mypy strict 125 source files다.
   소스 실행 기준 doctor 15/15, Credential preflight 3/3, 13-capability service `CREATED`와
   `capture_running=false`를 재확인했다.
 - 실제 기본 마이크에서 frame과 음성 energy가 들어오는 것은 확인했지만 공식 영어
@@ -88,8 +88,8 @@
 
 ## 현재 릴리스 증거
 
-- Python 전체: 797 passed, 3 skipped, line coverage 83%.
-- Ruff clean, mypy strict 124 source files.
+- Python 전체: 809 passed, 3 skipped, line coverage 83%.
+- Ruff clean, mypy strict 125 source files.
 - Windows Hello helper build: warning 0, error 0.
 - `javis doctor`: SAPI와 optional pycaw를 포함한 15개 check PASS.
 - 새 wheel은 128 entry, 299,655바이트, SHA-256 `01924a9db4e2321cc6db9d1057b36f8421c5e55656b03d0d5854519ceaa40a48`이다. 빈 venv에 필수 dependency와 함께 설치해 RepCNN 평가 CLI와 adapter import를 재현했다.

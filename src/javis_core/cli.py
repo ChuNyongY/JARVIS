@@ -88,8 +88,19 @@ from .user_validation import (
     UserValidationWorkflow,
 )
 from .verifier import PredicateVerifier
-from .voice_adapters import OpenWakeWordDetector, RepCnnWakeWordDetector
+from .voice_adapters import (
+    OpenWakeWordDetector,
+    RepCnnWakeWordDetector,
+    SoundDeviceFrameSource,
+)
 from .wakeword_bundle import load_wakeword_bundle
+from .wakeword_corpus_capture import (
+    ConsoleWakeWordCaptureConsent,
+    ConsoleWakeWordCaptureReadiness,
+    WakeWordCaptureError,
+    capture_wakeword_corpus,
+    load_wakeword_capture_plan,
+)
 from .wakeword_evaluation import (
     evaluate_wakeword_corpus,
     load_wakeword_corpus_manifest,
@@ -226,6 +237,13 @@ def build_parser() -> argparse.ArgumentParser:
     repcnn_evaluation.add_argument("model_path", type=Path)
     repcnn_evaluation.add_argument("model_sha256")
     repcnn_evaluation.add_argument("--threshold", type=float, default=0.7)
+
+    wakeword_capture = subparsers.add_parser(
+        "capture-wakeword-corpus",
+        help="Record a consent-bound local wake-word corpus interactively",
+    )
+    wakeword_capture.add_argument("plan", type=Path)
+    wakeword_capture.add_argument("destination", type=Path)
 
     smoke = subparsers.add_parser(
         "smoke-system-info",
@@ -398,6 +416,34 @@ def main(arguments: Sequence[str] | None = None) -> int:
             threshold=args.threshold,
         )
         print(wakeword_report.model_dump_json(indent=2))
+        return 0
+    if args.command == "capture-wakeword-corpus":
+        capture_plan = load_wakeword_capture_plan(args.plan)
+        consent_id = ConsoleWakeWordCaptureConsent().request(capture_plan)
+        if consent_id is None:
+            print(json.dumps({"status": "SKIPPED", "code": "CONSENT_NOT_GIVEN"}))
+            return 1
+        try:
+            captured_manifest = capture_wakeword_corpus(
+                capture_plan,
+                args.destination,
+                consent_id,
+                SoundDeviceFrameSource,
+                ConsoleWakeWordCaptureReadiness(),
+            )
+        except WakeWordCaptureError:
+            print(json.dumps({"status": "ERROR", "code": "CAPTURE_FAILED"}))
+            return 1
+        print(
+            json.dumps(
+                {
+                    "status": "CAPTURED",
+                    "corpus_id": captured_manifest.corpus_id,
+                    "sample_count": len(captured_manifest.samples),
+                },
+                ensure_ascii=False,
+            )
+        )
         return 0
     if args.command == "smoke-system-info":
         return _smoke_system_info(args.audit_path)

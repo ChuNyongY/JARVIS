@@ -1,7 +1,8 @@
 # 한국어 음성 평가 계약
 
 음성 평가 하네스는 로컬 corpus 파일만 읽으며 마이크를 열거나 네트워크를 사용하지 않는다.
-실제 녹음은 참가자의 별도 동의 절차와 보관 정책이 마련된 환경에서 외부 도구로 수행해야 한다.
+실제 녹음은 참가자의 별도 동의와 보관 정책이 필요하다. 이 저장소에는 그 경계를 강제하는
+대화형 수집 명령도 있지만, 평가 명령과는 분리되어 있다.
 
 별도의 `probe-microphones` 명령은 장치를 열지 않고 PortAudio의 device metadata와
 `check_input_settings`만 조회한다. 반환값은 index, 입력 channel 수, 기본 sample rate, 기본 장치
@@ -45,6 +46,28 @@ reference만 사용한다.
 잡음, wake-word 정확도, faster-whisper 모델 품질은 아직 측정하지 않았다.
 
 ## Wake-word FAR/FRR 평가
+
+### 동의 기반 로컬 자료 수집
+
+`capture-wakeword-corpus`는 계획 파일을 먼저 엄격히 검사한 뒤, 대화형 터미널에서 매 실행 새로
+표시되는 `동의 <무작위 토큰>`을 정확히 입력한 경우에만 진행한다. 안내에는 표본 수, 녹음 시간,
+원음 WAV가 로컬에 계속 보관된다는 사실이 포함된다. 각 표본 직전에도 `준비`를 입력해야 마이크를
+연다. 비대화형 입력, Enter, 틀린 문구는 녹음을 시작하지 않거나 전체 수집을 취소한다.
+
+```powershell
+python -m javis_core.cli capture-wakeword-corpus `
+  .\evaluation\wakeword_capture_plan.example.json `
+  C:\absolute\new-wake-corpus-directory
+```
+
+출력 폴더는 존재하지 않는 절대 경로여야 한다. 수집기는 16 kHz mono signed 16-bit PCM을 표본별
+WAV로 기록하고, 파일이 비어 있을 때부터 현재 사용자 전용 Windows ACL을 적용한다. 완성 뒤 다시
+ACL을 검증하고 SHA-256과 동의 기록 식별자를 `manifest.json`에 저장한다. 중간 취소·장치 오류·ACL
+실패 때는 이번 실행이 만든 파일만 지운다. 원음, 경로, 동의 식별자는 표준 출력에 표시하지 않는다.
+
+예제 계획은 기능 확인용으로 양성·음성 각 2개뿐이다. 논문 성능 주장에는 화자·거리·소음 조건을
+미리 고정하고 더 큰 자료를 별도 연구 동의하에 수집해야 한다. 2026-10-07에는 비대화형 동의 거부
+경로만 실행했으며, 이 명령으로 실제 마이크를 열거나 원음을 생성하지 않았다.
 
 `evaluate-wakeword-corpus`는 마이크와 네트워크를 열지 않고 동의·SHA-256이 결합된 로컬 WAV만
 읽는다. manifest는 최소 한 개의 목표 호출어 표본과 한 개의 비호출어 표본을 포함해야 한다.

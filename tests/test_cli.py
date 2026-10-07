@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
 from pytest import CaptureFixture, MonkeyPatch
 
 from javis_core import (
@@ -58,6 +59,39 @@ def test_credential_product_commands_do_not_accept_a_secret_path() -> None:
         parsed = parser.parse_args((command, "C:/project", "C:/project/config.json"))
         assert parsed.command == command
         assert not hasattr(parsed, "nim_secret")
+
+
+def test_capture_wakeword_command_does_not_create_source_without_consent(
+    tmp_path: Path,
+    capsys: CaptureFixture[str],
+    monkeypatch: MonkeyPatch,
+) -> None:
+    plan_path = tmp_path / "plan.json"
+    plan_path.write_text(
+        '{"schema_version":"1.0","corpus_id":"test","locale":"ko-KR",'
+        '"duration_ms":1600,"samples":['
+        '{"sample_id":"positive","target_present":true},'
+        '{"sample_id":"negative","target_present":false}]}',
+        encoding="utf-8",
+    )
+    destination = (tmp_path / "capture").resolve()
+
+    class NoConsent:
+        def request(self, _plan: object) -> None:
+            return None
+
+    monkeypatch.setattr(cli_module, "ConsoleWakeWordCaptureConsent", NoConsent)
+    monkeypatch.setattr(
+        cli_module,
+        "capture_wakeword_corpus",
+        lambda *_args, **_kwargs: pytest.fail("capture must not run"),
+    )
+
+    result = main(("capture-wakeword-corpus", str(plan_path), str(destination)))
+
+    assert result == 1
+    assert not destination.exists()
+    assert json.loads(capsys.readouterr().out)["code"] == "CONSENT_NOT_GIVEN"
 
 
 def test_collect_existing_p2_command_records_and_resumes_supported_cells(

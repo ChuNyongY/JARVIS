@@ -1,0 +1,12 @@
+{
+  "schema_version": "1.0",
+  "corpus_id": "ko-jarvis-local-pilot",
+  "locale": "ko-KR",
+  "duration_ms": 3200,
+  "samples": [
+    {"sample_id": "positive-01", "target_present": true},
+    {"sample_id": "positive-02", "target_present": true},
+    {"sample_id": "negative-01", "target_present": false},
+    {"sample_id": "negative-02", "target_present": false}
+  ]
+}

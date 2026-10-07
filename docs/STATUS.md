@@ -4,7 +4,7 @@
 
 ## 2026-10-07 최신 재검증 요약
 
-전체 회귀는 797 passed, 3 skipped, line coverage 83%, Ruff clean, mypy strict 124 source files다.
+전체 회귀는 809 passed, 3 skipped, line coverage 83%, Ruff clean, mypy strict 125 source files다.
 소스 doctor 15/15, Credential preflight 3/3과 13-capability service `CREATED`를 재확인했다.
 
 새 wheel은 128개 entry, 299,655바이트, SHA-256
@@ -252,8 +252,8 @@ Chrome 자동 업데이트로 발생한 등록 해시 drift를 수정했고, 최
 
 ## 검증 해석
 
-현재 전체 회귀 검증은 797 passed, 3 skipped, line coverage 83%, Ruff clean,
-mypy strict 124 source files다. Windows Hello helper는 경고 0/오류 0으로 재빌드됐고 source doctor 15개 항목은
+현재 전체 회귀 검증은 809 passed, 3 skipped, line coverage 83%, Ruff clean,
+mypy strict 125 source files다. Windows Hello helper는 경고 0/오류 0으로 재빌드됐고 source doctor 15개 항목은
 모두 PASS했다. Windows Credential Manager의 고정 target은 실제 `PRESENT`이고 Credential product-host
 preflight도 config/secret/doctor 3/3 PASS했다. 배포 대상 실제 key exact-match scan도 통과했다.
 최신 wheel은 128개 entry이며
@@ -478,3 +478,8 @@ recovery는 파일을 이동하거나 삭제하지 않고, 관찰된 상태에 �
   `0.624035120`이었다. 이는
   연결 검증 결과이고 음성이 없는 양성 표본이므로 성능 자료로 사용하지 않는다.
 - 이 단계 구현 뒤 최종 전체 회귀는 상단 최신 재검증처럼 797 passed, 3 skipped다.
+- 동의 기반 호출어 자료 수집 핵심부와 `capture-wakeword-corpus` CLI를 추가했다. 매 실행 새
+  `동의 <무작위 토큰>`과 표본별 `준비`를 요구하고, 새 절대 출력 폴더만 허용하며, 원음을 쓰기 전
+  빈 파일부터 사용자 전용 ACL을 적용한다. WAV/manifest 해시와 동의 기록을 결합하고 중간 실패 시
+  이번 실행이 만든 파일만 정리한다. 비대화형 안전 시험은 `CONSENT_NOT_GIVEN`, 마이크 source 0회,
+  출력 폴더 0개였으며 실제 녹음은 수행하지 않았다. 최신 전체 회귀는 809 passed, 3 skipped다.
