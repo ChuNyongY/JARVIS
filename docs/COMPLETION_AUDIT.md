@@ -83,7 +83,7 @@
 | B0/B1/P1/P2 비교 | 부분 | strict paired data loader, metric/통계 분석기 | 실제 snapshot VM trial 또는 participant data |
 | 15개 통합 시나리오 | 부분 | strict manifest와 격리, 요구 이름 23/23 cataloged, S01 Chrome process/window actual+cleanup PASS, S02 exact 30% actual+restore PASS, S03 memory/PDF/Edge-window actual fixture+cleanup PASS, S11 actual read-only·S14/S15 policy 3/3 PASS, S06/S13 mock 2/2 PASS·외부효과 0, S04/S05/S07 disposable fixture E2E 3/3 PASS, package-verify/reset-prepare 계약, signed exact-cell snapshot evidence consumer | 외부 snapshot harness의 실제 50셀, 실제 package install, 웹·음성·메시지 및 반복 결과 |
 | UER/Unsafe/Underclassification/TSR/Recovery/CB | 부분 | 계산 계약과 Wilson/McNemar/Holm 보고서 | 사전등록된 실제 관찰값 |
-| 음성 FAR/FRR/CER/WER/Macro-F1 | 부분 | offline corpus manifest/hash/WAV, 거리·소음·세션별 FAR/FRR과 CER/WER 하네스 | 동의된 한국어 음성 corpus 및 wake/intent metric |
+| 음성 FAR/FRR/CER/WER/Macro-F1 | 부분 | offline corpus manifest/hash/WAV, 거리·소음·세션별 FAR/FRR, 학습·보정·시험 분리 계획과 CER/WER 하네스 | 동의된 한국어 음성 corpus 및 wake/intent metric |
 | 30~50개 작업 80% 목표 | 미검증 | S01~S15별 nominal/fault 30-task strict manifest, schema 1.2 선언/실행 환경 분리, exact 120셀 수집·재개·artifact schema 1.1 assertion 결과 검증. 현재 PC에서 가능한 B0 4, B1 22, P1 22, P2 22를 합쳐 실제 70/120 완료, runner 부재 0, snapshot VM 부재 50. B1/P1은 system verifier·replan 없이 조건 차이를 보존한다 | snapshot VM 50셀, B0/B1/P1/P2 완전 반복 결과와 실제 80% 달성 증거 |
 | RED 무승인 실행 0 | 부분 | policy/approval 단위·통합 계약에서 0 | 실제 VM 위험 scenario 반복 증거 |
 | recoverable failure 60% | 미검증 | fault injection 및 recovery metric 계약 | 실제 또는 VM UI failure 결과 |
@@ -94,8 +94,8 @@
 - Ruff clean, mypy strict 125 source files.
 - Windows Hello helper build: warning 0, error 0.
 - `javis doctor`: SAPI와 optional pycaw를 포함한 15개 check PASS.
-- 새 wheel은 129 entry, 304,014바이트, SHA-256 `e95fa41ad68692ab08f2543bf2195e8f86abeff9bd5fafb427973ee2db00731b`이다. 빈 venv에 필수 dependency와 함께 설치해 호출어 수집 CLI와 공개 API import를 재현했다.
-- current frozen one-folder는 1,826-entry manifest exact 검증을 통과했고 package manifest SHA-256은 `09e81ca7354eae542b13e82941f2b84686cbee2dac3134fa833d63014cd24f8b`다. frozen 수집 CLI 비동의 안전 종료, doctor, Credential `PRESENT`, preflight 3/3과 13-capability service `CREATED`를 재현했다. 260,349,952-byte per-user Setup SHA-256은 `d1aed47face805d6273223ac9a8888ee33413fd89bab4d77897a6284313c472d`이며 sidecar와 일치한다. 새 Setup은 생성·감사했지만 실제 설치는 아직 실행하지 않았다. 이전 산출물의 최초 설치·manifest·preflight·autostart `ABSENT` 증거는 유지된다. console/tray/Setup은 Authenticode 미서명이므로 공개 배포 완료는 아니다.
+- 새 wheel은 129 entry, 305,279바이트, SHA-256 `69c3c7b66a7a36f420a42e1f566595d78ad3bc7719e3ad9812895385725d30d6`이다. 빈 venv에 필수 dependency와 함께 설치해 자료 형식 1.1 공개 API import를 재현했다.
+- current frozen one-folder는 1,826-entry manifest exact 검증을 통과했고 package manifest SHA-256은 `813687c60c5794c2198f51b258840914c1aa43d83120c46188b42c532baedac4`다. frozen 1.1 계획의 비동의 안전 종료, doctor, Credential `PRESENT`, preflight 3/3과 13-capability service `CREATED`를 재현했다. 260,354,048-byte per-user Setup SHA-256은 `7def8ac48aaf7fade9304633c292914c9be95e6730f73ea98a2a52e6fffde532`이며 sidecar와 일치한다. 새 Setup은 생성·감사했지만 실제 설치는 아직 실행하지 않았다. 이전 산출물의 최초 설치·manifest·preflight·autostart `ABSENT` 증거는 유지된다. console/tray/Setup은 Authenticode 미서명이므로 공개 배포 완료는 아니다.
 - 실제 local voice composition smoke: openWakeWord와 faster-whisper bundle 초기화 및 `VoicePipeline` 조립 PASS, microphone 미개방.
 - synthetic closed-loop product composition: wake/VAD/STT, typed intent/plan, policy, executor, verifier, audit, 완료 event PASS; 외부효과 0.
 - 실제 product-host preflight: config, protected NIM secret, doctor 3/3 PASS, `ready=true`, exit 0. 마이크·모델 inference·앱·HUD는 열지 않음.

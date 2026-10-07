@@ -182,6 +182,8 @@ python tools/build_windows_installer.py
 음성 corpus 형식과 CER/WER 정의는 [한국어 음성 평가 계약](docs/VOICE_EVALUATION.md)에 있다.
 공개 Jarvis 호출 방식과 한국어 호출어 모델 선택 근거는
 [호출어 비교·감사 문서](docs/WAKEWORD_REFERENCE_AUDIT.md)에 있다.
+학습·임계값 보정·최종 시험 분리와 거리·소음 조건은
+[한국어 호출어 모델 실험계획서](docs/WAKEWORD_STUDY_PROTOCOL.md)에 있다.
 NIM 의도 제안과 로컬 실행 결정의 분리는 [Intent classifier 문서](docs/INTENT_CLASSIFIER.md)에 있다.
 음성 명령의 계획 전 연결과 STOP token 계약은 [음성 명령 문서](docs/VOICE_COMMAND.md)에 있다.
 로컬 Windows SAPI 출력과 WAV 검증 경계는 [TTS 문서](docs/TTS.md)에 있다.

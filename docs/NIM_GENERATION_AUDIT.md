@@ -1501,3 +1501,8 @@ NIM 결과는 그대로 반영하지 않았다. 감사 과정에서 다음 문�
 - 조건 열거형 방향만 참고했다. 실제 구현은 schema 1.1을 쓰되 1.0의 누락 필드를 미지정 조건으로
   읽고, 모든 조건 조합에 양성과 비호출어를 요구한다. 실패는 기존 전체 계산과 똑같이 FN 또는 FP로
   남기며, 조건 합계가 전체 confusion count·실패 수와 일치하지 않으면 report 생성을 거부한다.
+- 자료 형식 1.1을 포함한 wheel은 129 entry, 305,279바이트, SHA-256
+  `69c3c7b66a7a36f420a42e1f566595d78ad3bc7719e3ad9812895385725d30d6`이다. one-folder manifest
+  SHA-256은 `813687c60c5794c2198f51b258840914c1aa43d83120c46188b42c532baedac4`, Setup SHA-256은
+  `7def8ac48aaf7fade9304633c292914c9be95e6730f73ea98a2a52e6fffde532`다. 비동의 frozen 실행의
+  마이크 source와 출력은 0이고, package/Setup 실제 key exact match와 `NIM.txt`는 0건이다.
