@@ -1552,3 +1552,26 @@ NIM 결과는 그대로 반영하지 않았다. 감사 과정에서 다음 문�
   `3f278b54d655577cf0cb53f4bdc8f222c325b36323b9176755c35f2ecc0bc26f`다. exact manifest,
   frozen 비동의 종료, Credential preflight 3/3, 13-capability service 조립과 실제 key 0건을 확인했다.
   console/tray/Setup은 인증서가 없어 `NotSigned`다.
+
+## 2026-10-07 한국어 Vosk 후보 초안 감사
+
+- 실제 음성·전사문·경로·API key를 제외하고 4표본 집계와 설계 제약만 NIM
+  `z-ai/glm-5.3-flash`에 제공해 어댑터·시험·한국어 문서 초안을 받았다.
+- 초안은 실제 공식 모델에 없는 `conf/graph/words.txt`를 필수로 가정했고, `Model` 객체에 존재하지
+  않는 recognizer 생성법과 현재 `AudioFrame`에 없는 `bytes` 필드를 썼다. fake 주입 시에도 native
+  모델을 먼저 로드했으며, 측정하지 않은 `저비스`·`재비스`를 별칭으로 허용했다. 그대로 채택하지 않았다.
+- 원음·비제한 인식, 전사문 비노출, 기본 경로와 분리, bounded window라는 방향만 채택했다. Codex가
+  공식 Python API와 실제 15파일 모델 구조를 대조해 별도 bundle loader, recognizer factory,
+  3.2초 확정·0.8초 겹침, exact `자비스` token 판정과 fail-closed 처리를 구현했다.
+- 80 ms streaming 및 정식 평가 CLI에서 TP 2/TN 2/FP 0/FN 0, 추론 실패 0을 재현했다. 제한 문법의
+  FP 1과 증폭 원거리 FN 1도 별도로 확인해 두 방식을 제외했다. 이 수치는 2+/2- pilot이라 성능 개선
+  또는 제품 채택 근거로 쓰지 않는다.
+- 전체 검증은 841 passed, 3 skipped, coverage 83%, Ruff clean, mypy strict 128 source files다.
+- 132-entry wheel은 311,893바이트, SHA-256
+  `dd7012317e3667fb6caa9f02eecbbfd3eba9b39f371f393938b1e37562efffe6`이며 깨끗한 환경에서 Vosk가
+  설치되지 않은 채 import와 실험 CLI 등록을 통과했다. 1,826-entry one-folder manifest SHA-256은
+  `ab95beca300eaf90b43a4e940dcbf588d4f16917a28fc47b36a6940efb56c087`, Setup SHA-256은
+  `cb4edd33413732c7f69fc4662c848f22c1fcee7decb2d1caeed65bfd3fd428c5`다. package·Setup 1,828파일의
+  실제 key 일치, `NIM.txt`, Vosk 모델/native 파일은 모두 0건이다. frozen manifest 검증, 비동의
+  capture 무생성, Credential preflight 3/3과 13-capability service 조립을 재현했다. 세 실행 파일은
+  인증서가 없어 `NotSigned`다.

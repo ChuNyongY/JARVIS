@@ -512,3 +512,14 @@ recovery는 파일을 이동하거나 삭제하지 않고, 관찰된 상태에 �
   화면이 기존 enum을 고정 한국어 문구로 표시하도록 수정했고, 미지정·근거리 조용함·원거리 말소리
   조건과 기존 exact `준비` 계약을 회귀시험으로 고정했다. 최종 전체 회귀는 826 passed,
   3 skipped다.
+- 공식 한국어 `vosk-model-small-ko-0.22`를 제품 밖에서 시험했다. 일반 인식·원음 조합은 실제
+  4표본 pilot에서 TP 2/TN 2/FP 0/FN 0이었지만, 제한 문법은 비호출어 1개를 오탐했고 음량 증폭은
+  원거리 양성 1개를 놓쳤다. 일반 인식만 쓰는 실험 어댑터, 3.2초 확정·0.8초 겹침 창, 전사문
+  비노출, 정확한 15파일 manifest 검증과 별도 평가 CLI를 추가했다. 첫 검출 상한은 2,080 ms와
+  3,200 ms였다. 4표본은 성능 근거가 아니며 264,364,726바이트의 풀린 모델과 선택 의존성은 기본
+  제품·설치본에 넣지 않았다. 전체 회귀는 841 passed, 3 skipped, coverage 83%, Ruff clean,
+  mypy strict 128 source files다.
+- 최신 wheel SHA-256은 `dd7012317e3667fb6caa9f02eecbbfd3eba9b39f371f393938b1e37562efffe6`,
+  one-folder manifest SHA-256은 `ab95beca300eaf90b43a4e940dcbf588d4f16917a28fc47b36a6940efb56c087`,
+  Setup SHA-256은 `cb4edd33413732c7f69fc4662c848f22c1fcee7decb2d1caeed65bfd3fd428c5`다.
+  기본 배포물의 Vosk 모델/native 파일은 0건이며 서명은 아직 `NotSigned`다.

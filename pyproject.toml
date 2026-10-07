@@ -33,6 +33,7 @@ voice = [
   "sounddevice>=0.5,<1",
   "scipy>=1.16,<1.17; platform_system == 'Windows'",
 ]
+vosk-experimental = ["vosk==0.3.45"]
 uia = ["pywinauto>=0.6.9,<1"]
 trash = ["send2trash>=1.8,<2"]
 audio-control = ["pycaw>=20251023,<20270000"]

@@ -705,6 +705,53 @@ def test_evaluate_repcnn_wakeword_corpus_requires_pinned_local_model(
     }
 
 
+def test_evaluate_vosk_wakeword_corpus_uses_pinned_bundle(
+    capsys: CaptureFixture[str],
+    monkeypatch: MonkeyPatch,
+) -> None:
+    bundle = object()
+    manifest = object()
+    detector = object()
+    observed: dict[str, object] = {}
+
+    monkeypatch.setattr(cli_module, "load_vosk_bundle", lambda path: bundle)
+    monkeypatch.setattr(
+        cli_module.VoskKoreanWakeWordDetector,
+        "from_local_bundle",
+        lambda loaded: detector if loaded is bundle else None,
+    )
+    monkeypatch.setattr(cli_module, "load_wakeword_corpus_manifest", lambda path: manifest)
+
+    def evaluate(loaded, root, loaded_detector, *, threshold):  # type: ignore[no-untyped-def]
+        observed.update(
+            manifest=loaded,
+            root=root,
+            detector=loaded_detector,
+            threshold=threshold,
+        )
+        return SimpleNamespace(model_dump_json=lambda **_options: '{"sample_count":4}')
+
+    monkeypatch.setattr(cli_module, "evaluate_wakeword_corpus", evaluate)
+
+    result = main(
+        (
+            "evaluate-vosk-wakeword-corpus",
+            "C:/corpus/manifest.json",
+            "C:/corpus",
+            "C:/models/vosk/manifest.json",
+        )
+    )
+
+    assert result == 0
+    assert json.loads(capsys.readouterr().out) == {"sample_count": 4}
+    assert observed == {
+        "manifest": manifest,
+        "root": Path("C:/corpus"),
+        "detector": detector,
+        "threshold": 0.5,
+    }
+
+
 def test_smoke_system_info_runs_full_read_only_loop(capsys: CaptureFixture[str]) -> None:
     result = main(("smoke-system-info",))
 

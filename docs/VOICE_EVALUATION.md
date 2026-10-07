@@ -167,6 +167,32 @@ python -m javis_core.cli evaluate-repcnn-wakeword-corpus `
 끝까지 확인했다. 임계값 0.7에서 FAR 0.0, FRR 1.0이었지만 호출어가 없는 합성 양성 표본이므로 이
 수치는 모델 품질이나 한국어 성능의 근거가 아니다.
 
+### 실험용 한국어 Vosk 후보
+
+공식 `vosk-model-small-ko-0.22`는 한국어 오프라인 음성 인식 모델이다. 실험용
+`VoskKoreanWakeWordDetector`는 제한 문법이나 음량 증폭을 쓰지 않고 일반 인식 결과 안에 정확한
+단어 `자비스`가 있는지만 내부에서 확인한다. 전사문은 반환·저장·로그하지 않는다. 3.2초마다 결과를
+강제로 확정하고 마지막 0.8초를 다음 창에 겹쳐 발화가 창 경계에 걸리는 위험을 줄인다. 네이티브 오류나
+잘못된 JSON은 활성화 점수 0으로 닫힌다.
+
+모델은 manifest와 같은 폴더에 있어야 한다. loader는 공식 모델의 정확한 15개 파일 목록, 각 파일의
+상대경로·크기·SHA-256, 모델 이름·한국어 locale·Apache-2.0 라이선스·고정 다운로드 URL과 압축파일
+SHA-256을 검증한다. symlink, 누락·추가 파일, root 이탈을 거부한다. 264,364,726바이트로 풀리는 모델과
+`vosk` 패키지는 기본 `voice` 배포에 넣지 않았고 별도 `vosk-experimental` 선택 의존성으로만 선언했다.
+
+```powershell
+python -m javis_core.cli evaluate-vosk-wakeword-corpus `
+  C:\absolute\wake-corpus\manifest.json `
+  C:\absolute\wake-corpus `
+  C:\absolute\vosk-model-small-ko-0.22\manifest.json
+```
+
+현재 실제 4표본 pilot에서 TP 2/TN 2/FP 0/FN 0, 추론 실패 0이었다. 첫 검출 상한은 근거리·조용함
+양성 2,080 ms, 원거리·사람 말소리 양성 3,200 ms였다. 같은 표본에서 제한 문법은 비호출어 하나를
+오탐했고, 음량 증폭은 원거리 양성 하나를 놓쳐 둘 다 제외했다. 그러나 양성 2개와 비호출어 2개는
+정확도·효율·일반화 성능을 주장할 수 없는 절차 pilot이다. 독립된 더 큰 보정·최종시험 자료가 기준을
+통과하기 전에는 제품 기본 openWakeWord 경로를 바꾸거나 모델을 배포물에 포함하지 않는다.
+
 ## Wake-word model bundle
 
 `models/openwakeword/manifest.json`은 공식 openWakeWord v0.5.1의 ONNX wake-word와 feature model

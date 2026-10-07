@@ -592,6 +592,14 @@ from .volume_adapter import (
     WindowsVolumeExecutor,
 )
 from .volume_scenario import S02VolumeScenarioRunner, VolumeScenarioResult
+from .vosk_bundle import (
+    LoadedVoskBundle,
+    VoskBundleError,
+    VoskBundleManifest,
+    VoskModelFile,
+    load_vosk_bundle,
+)
+from .vosk_wakeword import VoskKoreanWakeWordDetector
 from .wakeword_bundle import (
     LoadedWakeWordBundle,
     WakeWordBundleError,
@@ -874,6 +882,7 @@ __all__ = [
     "MicrophoneProbeReport",
     "LocalStopDetector",
     "LoadedWakeWordBundle",
+    "LoadedVoskBundle",
     "LoadedSttBundle",
     "LoadedProductHostConfig",
     "LocalApprovalPresenter",
@@ -1050,6 +1059,10 @@ __all__ = [
     "VoiceCorpusReport",
     "VoiceCorpusSample",
     "VoiceSampleReport",
+    "VoskBundleError",
+    "VoskBundleManifest",
+    "VoskKoreanWakeWordDetector",
+    "VoskModelFile",
     "WakeWordBundleError",
     "WakeWordBundleManifest",
     "WakeWordCorpusManifest",
@@ -1156,6 +1169,7 @@ __all__ = [
     "load_voice_corpus_manifest",
     "load_wakeword_corpus_manifest",
     "load_wakeword_bundle",
+    "load_vosk_bundle",
     "load_wakeword_capture_plan",
     "LOCAL_CONTROL_CAPABILITIES",
     "DEFAULT_WAKEWORD_THRESHOLDS",

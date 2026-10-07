@@ -93,6 +93,8 @@ from .voice_adapters import (
     RepCnnWakeWordDetector,
     SoundDeviceFrameSource,
 )
+from .vosk_bundle import load_vosk_bundle
+from .vosk_wakeword import VoskKoreanWakeWordDetector
 from .wakeword_bundle import load_wakeword_bundle
 from .wakeword_calibration import (
     WakeWordCalibrationStatus,
@@ -242,6 +244,14 @@ def build_parser() -> argparse.ArgumentParser:
     repcnn_evaluation.add_argument("model_path", type=Path)
     repcnn_evaluation.add_argument("model_sha256")
     repcnn_evaluation.add_argument("--threshold", type=float, default=0.7)
+
+    vosk_evaluation = subparsers.add_parser(
+        "evaluate-vosk-wakeword-corpus",
+        help="Evaluate the experimental pinned Korean Vosk model without a microphone",
+    )
+    vosk_evaluation.add_argument("manifest", type=Path)
+    vosk_evaluation.add_argument("corpus_root", type=Path)
+    vosk_evaluation.add_argument("vosk_manifest", type=Path)
 
     wakeword_calibration = subparsers.add_parser(
         "calibrate-wakeword-threshold",
@@ -438,6 +448,18 @@ def main(arguments: Sequence[str] | None = None) -> int:
             args.corpus_root,
             repcnn_detector,
             threshold=args.threshold,
+        )
+        print(wakeword_report.model_dump_json(indent=2))
+        return 0
+    if args.command == "evaluate-vosk-wakeword-corpus":
+        vosk_detector = VoskKoreanWakeWordDetector.from_local_bundle(
+            load_vosk_bundle(args.vosk_manifest)
+        )
+        wakeword_report = evaluate_wakeword_corpus(
+            load_wakeword_corpus_manifest(args.manifest),
+            args.corpus_root,
+            vosk_detector,
+            threshold=0.5,
         )
         print(wakeword_report.model_dump_json(indent=2))
         return 0

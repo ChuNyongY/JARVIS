@@ -114,9 +114,9 @@ python tools\build_windows_installer.py `
 ```
 
 현재 후보 one-folder는 1,826 manifest entry이며 source verifier로 exact manifest를 통과했다.
-package manifest SHA-256은 `d1203f8456718ab130523966b545fce1070a98789d523652252d58d4432d8fa0`다.
-Setup은 Microsoft 서명된 시스템 IExpress builder를 사용해 생성한 260,362,240바이트 per-user
-extractor이며 SHA-256은 `3f278b54d655577cf0cb53f4bdc8f222c325b36323b9176755c35f2ecc0bc26f`이다.
+package manifest SHA-256은 `ab95beca300eaf90b43a4e940dcbf588d4f16917a28fc47b36a6940efb56c087`다.
+Setup은 Microsoft 서명된 시스템 IExpress builder를 사용해 생성한 260,386,816바이트 per-user
+extractor이며 SHA-256은 `cb4edd33413732c7f69fc4662c848f22c1fcee7decb2d1caeed65bfd3fd428c5`이다.
 내부 설치 진입부는
 PowerShell 실행정책을 우회하지 않고 Windows `cmd`, `certutil`, `tar`와 staged `JAVIS.exe
 verify-package`만 사용한다. 실제 최초 설치, 설치본 manifest 일치, Credential preflight와 서비스 조립을
