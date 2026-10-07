@@ -8,7 +8,11 @@ from pathlib import Path
 
 import pytest
 
-from javis_core import AudioFrame
+from javis_core import (
+    AudioFrame,
+    WakeWordCalibrationStatus,
+    calibrate_wakeword_threshold,
+)
 from javis_core.voice_evaluation import VoiceCorpusError
 from javis_core.wakeword_evaluation import (
     WakeWordCorpusManifest,
@@ -288,4 +292,84 @@ def test_evaluation_rejects_non_float_or_out_of_range_thresholds(
             root,
             SequencedDetector([[0.9, 0.9], [0.1, 0.1]]),
             threshold=threshold,  # type: ignore[arg-type]
+        )
+
+
+def test_calibration_selects_deterministic_highest_tied_threshold(
+    tmp_path: Path,
+) -> None:
+    manifest, root = prepare_manifest(tmp_path)
+    evaluation = evaluate_wakeword_corpus(
+        manifest,
+        root,
+        SequencedDetector([[0.8, 0.8], [0.6, 0.6], [0.4, 0.4], [0.3, 0.3]]),
+    )
+
+    report = calibrate_wakeword_threshold(
+        evaluation,
+        far_ceiling=0.0,
+        thresholds=(0.5, 0.7, 0.8, 0.9),
+    )
+
+    assert report.status is WakeWordCalibrationStatus.SELECTED
+    assert report.selected_threshold == 0.8
+    assert report.candidates[0].false_acceptance_rate == 0.5
+    assert report.candidates[2].false_acceptance_rate == 0.0
+    assert report.candidates[2].false_rejection_rate == 0.5
+    serialized = report.model_dump_json()
+    assert "audio" not in serialized.casefold()
+    assert "consent" not in serialized.casefold()
+
+
+def test_calibration_fails_closed_when_negative_inference_always_fails(
+    tmp_path: Path,
+) -> None:
+    manifest, root = prepare_manifest(tmp_path, labels=(True, False))
+    evaluation = evaluate_wakeword_corpus(
+        manifest,
+        root,
+        SequencedDetector([[0.9, 0.9], [RuntimeError("private")]]),
+    )
+
+    report = calibrate_wakeword_threshold(
+        evaluation,
+        far_ceiling=0.0,
+        thresholds=(0.5, 0.9),
+    )
+
+    assert report.status is WakeWordCalibrationStatus.NO_FEASIBLE_THRESHOLD
+    assert report.selected_threshold is None
+    assert all(candidate.false_acceptance_rate == 1.0 for candidate in report.candidates)
+    assert all(candidate.inference_failures == 1 for candidate in report.candidates)
+
+
+@pytest.mark.parametrize(
+    ("far_ceiling", "thresholds"),
+    [
+        (True, (0.5,)),
+        (0.05, (True,)),
+        (0.05, (0.5, 0.5)),
+        (0.05, (0.7, 0.6)),
+        (0.05, (0.49,)),
+        (0.05, (1.0,)),
+        (0.05, ()),
+    ],
+)
+def test_calibration_rejects_ambiguous_or_invalid_numeric_inputs(
+    tmp_path: Path,
+    far_ceiling: object,
+    thresholds: tuple[object, ...],
+) -> None:
+    manifest, root = prepare_manifest(tmp_path, labels=(True, False))
+    evaluation = evaluate_wakeword_corpus(
+        manifest,
+        root,
+        SequencedDetector([[0.9, 0.9], [0.1, 0.1]]),
+    )
+
+    with pytest.raises(ValueError):
+        calibrate_wakeword_threshold(
+            evaluation,
+            far_ceiling=far_ceiling,  # type: ignore[arg-type]
+            thresholds=thresholds,  # type: ignore[arg-type]
         )

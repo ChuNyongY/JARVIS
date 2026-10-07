@@ -112,6 +112,33 @@ prediction buffer를 `reset()`해 이전 음성이 다음 표본에 섞이지 �
 이 값은 제공된 corpus와 마이크·거리·소음 조건에만 해당한다. 실제 동의 corpus 없이 합성 단위시험
 결과를 제품 정확도로 주장하지 않는다.
 
+### 임계값 보정
+
+최종 시험 자료에서 임계값을 고르면 시험 결과에 과적합된다. 별도 보정 corpus에서 다음 명령을 먼저
+실행하고, 선택된 임계값과 보고서 SHA-256을 고정한 뒤 최종 시험에 사용한다.
+
+```powershell
+python -m javis_core.cli calibrate-wakeword-threshold `
+  C:\absolute\calibration-corpus\manifest.json `
+  C:\absolute\calibration-corpus `
+  .\models\openwakeword\manifest.json `
+  --far-ceiling 0.05
+
+python -m javis_core.cli calibrate-repcnn-wakeword-threshold `
+  C:\absolute\calibration-corpus\manifest.json `
+  C:\absolute\calibration-corpus `
+  C:\absolute\model\jarvis.onnx `
+  <64자리-model-sha256> `
+  --far-ceiling 0.05
+```
+
+평가기는 각 WAV를 한 번만 추론해 최대 점수를 얻고 0.50~0.99를 0.01 간격으로 계산한다. FAR 상한을
+만족하는 후보 중 FRR 최소, FAR 최소, 더 높은 임계값 순서로 하나를 고정한다. 비호출어 추론 실패는
+모든 후보에서 FP, 호출어 추론 실패는 모든 후보에서 FN이므로 실패를 제거해 임계값을 좋게 만들 수
+없다. 가능한 후보가 없으면 `NO_FEASIBLE_THRESHOLD`와 exit 1을 반환하며 임계값을 임의 선택하지 않는다.
+보고서는 원음·경로·동의 식별자나 sample별 점수를 포함하지 않고 후보별 분자·분모와 FAR/FRR만
+포함한다.
+
 `RepCnnWakeWordDetector`는 `wakeword-forge` 계열 ONNX를 비교하기 위한 실험 어댑터다. 16 kHz
 mono PCM의 최근 48,000표본(3초)을 보관하고 창이 찬 직후 한 번, 그 뒤 6,400표본(400 ms)마다
 추론한다. 모델은 네트워크에서 받지 않으며 호출자가 고정한 SHA-256, 16 MiB 크기 상한,

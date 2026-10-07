@@ -599,6 +599,13 @@ from .wakeword_bundle import (
     WakeWordModelFile,
     load_wakeword_bundle,
 )
+from .wakeword_calibration import (
+    DEFAULT_WAKEWORD_THRESHOLDS,
+    WakeWordCalibrationReport,
+    WakeWordCalibrationStatus,
+    WakeWordThresholdCandidate,
+    calibrate_wakeword_threshold,
+)
 from .wakeword_corpus_capture import (
     ConsoleWakeWordCaptureConsent,
     ConsoleWakeWordCaptureReadiness,
@@ -1051,6 +1058,9 @@ __all__ = [
     "WakeWordConditionReport",
     "WakeWordDistanceBand",
     "WakeWordNoiseCondition",
+    "WakeWordCalibrationReport",
+    "WakeWordCalibrationStatus",
+    "WakeWordThresholdCandidate",
     "ConsoleWakeWordCaptureConsent",
     "ConsoleWakeWordCaptureReadiness",
     "WakeWordCaptureError",
@@ -1123,6 +1133,7 @@ __all__ = [
     "build_windows_planner_context_provider",
     "build_windows_product_service",
     "capture_wakeword_corpus",
+    "calibrate_wakeword_threshold",
     "build_windows_product_service_with_secret_loader",
     "gate_scoped_policy_context_provider",
     "exact_mcnemar_p",
@@ -1147,6 +1158,7 @@ __all__ = [
     "load_wakeword_bundle",
     "load_wakeword_capture_plan",
     "LOCAL_CONTROL_CAPABILITIES",
+    "DEFAULT_WAKEWORD_THRESHOLDS",
     "normalize_korean_transcript",
     "nim_credential_status",
     "probe_microphones",

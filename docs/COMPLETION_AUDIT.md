@@ -4,8 +4,8 @@
 
 ## 2026-10-07 음성·사용자 검증 갱신
 
-- 전체 회귀는 **817 collected, 814 passed, 3 skipped**, line coverage 83%, Ruff clean,
-  mypy strict 125 source files다.
+- 전체 회귀는 **827 collected, 824 passed, 3 skipped**, line coverage 83%, Ruff clean,
+  mypy strict 126 source files다.
   소스 실행 기준 doctor 15/15, Credential preflight 3/3, 13-capability service `CREATED`와
   `capture_running=false`를 재확인했다.
 - 실제 기본 마이크에서 frame과 음성 energy가 들어오는 것은 확인했지만 공식 영어
@@ -15,6 +15,8 @@
   빼지 않고 양성 표본은 FN, 비호출어 표본은 FP로 보수적으로 계산한다.
 - 자료 형식 1.1은 거리·소음·비식별 세션 조건을 기록하고 각 조건의 양성·비호출어 균형을 강제하며,
   전체 수치와 같은 실패 산입 원칙으로 조건별 FAR/FRR을 낸다. 1.0 자료는 미지정 조건으로 읽는다.
+- 별도 보정 corpus에서 FAR 상한을 먼저 만족시키고 FRR·FAR·높은 임계값 순으로 0.50~0.99 중 하나를
+  고정하는 offline calibration CLI를 추가했다. 가능한 후보가 없으면 임계값을 만들지 않는다.
 - `wakeword-forge` 계열 후보용 RepCNN 어댑터와 별도 평가 CLI를 추가했다. 해시·크기·ONNX 입출력,
   3초 창과 400 ms hop을 검증하지만 제품 기본 경로에는 연결하지 않았다. 공개 `okay-hermes`의 무음
   점수 `0.624035120`과 합성 CLI FAR 0/FRR 1은 연결 증거일 뿐 한국어 성능 근거가 아니다.
@@ -90,8 +92,8 @@
 
 ## 현재 릴리스 증거
 
-- Python 전체: 814 passed, 3 skipped, line coverage 83%.
-- Ruff clean, mypy strict 125 source files.
+- Python 전체: 824 passed, 3 skipped, line coverage 83%.
+- Ruff clean, mypy strict 126 source files.
 - Windows Hello helper build: warning 0, error 0.
 - `javis doctor`: SAPI와 optional pycaw를 포함한 15개 check PASS.
 - 새 wheel은 129 entry, 305,279바이트, SHA-256 `69c3c7b66a7a36f420a42e1f566595d78ad3bc7719e3ad9812895385725d30d6`이다. 빈 venv에 필수 dependency와 함께 설치해 자료 형식 1.1 공개 API import를 재현했다.

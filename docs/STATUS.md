@@ -4,7 +4,7 @@
 
 ## 2026-10-07 최신 재검증 요약
 
-전체 회귀는 814 passed, 3 skipped, line coverage 83%, Ruff clean, mypy strict 125 source files다.
+전체 회귀는 824 passed, 3 skipped, line coverage 83%, Ruff clean, mypy strict 126 source files다.
 소스 doctor 15/15, Credential preflight 3/3과 13-capability service `CREATED`를 재확인했다.
 
 새 wheel은 129개 entry, 305,279바이트, SHA-256
@@ -252,8 +252,8 @@ Chrome 자동 업데이트로 발생한 등록 해시 drift를 수정했고, 최
 
 ## 검증 해석
 
-현재 전체 회귀 검증은 814 passed, 3 skipped, line coverage 83%, Ruff clean,
-mypy strict 125 source files다. Windows Hello helper는 경고 0/오류 0으로 재빌드됐고 source doctor 15개 항목은
+현재 전체 회귀 검증은 824 passed, 3 skipped, line coverage 83%, Ruff clean,
+mypy strict 126 source files다. Windows Hello helper는 경고 0/오류 0으로 재빌드됐고 source doctor 15개 항목은
 모두 PASS했다. Windows Credential Manager의 고정 target은 실제 `PRESENT`이고 Credential product-host
 preflight도 config/secret/doctor 3/3 PASS했다. 배포 대상 실제 key exact-match scan도 통과했다.
 최신 wheel은 129개 entry이며
@@ -487,3 +487,8 @@ recovery는 파일을 이동하거나 삭제하지 않고, 관찰된 상태에 �
   모두 없으면 거부하고, 조건별 FAR/FRR의 confusion count와 실패 수 합계가 전체와 일치해야 한다.
   추론 실패는 조건 보고서에서도 FN/FP로 남는다. 구형 1.0 자료는 미지정 조건으로 호환되며 최신
   전체 회귀는 814 passed, 3 skipped다.
+- 별도 보정 corpus의 최대 점수로 0.50~0.99 임계값을 한 번에 비교하는 두 calibration CLI를
+  추가했다. FAR 상한을 만족한 후보 중 FRR·FAR·높은 임계값 순으로 선택하고, 후보가 없으면 실패로
+  닫힌다. 합성 무음 양성·비호출어 각 1개에서 공식 영어 모델은 모든 후보 FAR 0/FRR 1이라 0.99가
+  기계적으로 선택됐지만, 호출어가 없는 양성 표본이므로 품질 근거가 아니다. 최신 전체 회귀는
+  824 passed, 3 skipped다.

@@ -18,6 +18,7 @@ from javis_core import (
     RiskLevel,
     RuntimeStatusSnapshot,
     TrialResult,
+    WakeWordCalibrationStatus,
 )
 from javis_core import cli as cli_module
 from javis_core.cli import build_parser, main
@@ -92,6 +93,59 @@ def test_capture_wakeword_command_does_not_create_source_without_consent(
     assert result == 1
     assert not destination.exists()
     assert json.loads(capsys.readouterr().out)["code"] == "CONSENT_NOT_GIVEN"
+
+
+def test_calibration_command_uses_separate_report_and_returns_selected(
+    capsys: CaptureFixture[str],
+    monkeypatch: MonkeyPatch,
+) -> None:
+    evaluation = object()
+    seen: dict[str, object] = {}
+
+    class Calibration:
+        status = WakeWordCalibrationStatus.SELECTED
+
+        def model_dump_json(self, *, indent: int) -> str:
+            assert indent == 2
+            return '{"status":"SELECTED","selected_threshold":0.8}'
+
+    monkeypatch.setattr(cli_module, "load_wakeword_bundle", lambda _path: object())
+    monkeypatch.setattr(
+        cli_module.OpenWakeWordDetector,
+        "from_local_bundle",
+        lambda _bundle: object(),
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "load_wakeword_corpus_manifest",
+        lambda _path: object(),
+    )
+    monkeypatch.setattr(
+        cli_module,
+        "evaluate_wakeword_corpus",
+        lambda *_args, **_kwargs: evaluation,
+    )
+
+    def calibrate(report: object, *, far_ceiling: float) -> Calibration:
+        seen.update(report=report, far_ceiling=far_ceiling)
+        return Calibration()
+
+    monkeypatch.setattr(cli_module, "calibrate_wakeword_threshold", calibrate)
+
+    result = main(
+        (
+            "calibrate-wakeword-threshold",
+            "manifest.json",
+            "corpus",
+            "model-manifest.json",
+            "--far-ceiling",
+            "0.02",
+        )
+    )
+
+    assert result == 0
+    assert seen == {"report": evaluation, "far_ceiling": 0.02}
+    assert json.loads(capsys.readouterr().out)["selected_threshold"] == 0.8
 
 
 def test_collect_existing_p2_command_records_and_resumes_supported_cells(

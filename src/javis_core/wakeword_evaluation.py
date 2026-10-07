@@ -167,6 +167,8 @@ class WakeWordCorpusReport(FrozenModel):
             raise ValueError("wake-word corpus counts are inconsistent")
         if len(self.samples) != self.sample_count:
             raise ValueError("wake-word sample count is inconsistent")
+        if len({item.sample_id for item in self.samples}) != self.sample_count:
+            raise ValueError("wake-word report sample IDs must be unique")
         if (
             self.true_positives
             + self.true_negatives

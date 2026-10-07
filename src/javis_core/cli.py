@@ -94,6 +94,10 @@ from .voice_adapters import (
     SoundDeviceFrameSource,
 )
 from .wakeword_bundle import load_wakeword_bundle
+from .wakeword_calibration import (
+    WakeWordCalibrationStatus,
+    calibrate_wakeword_threshold,
+)
 from .wakeword_corpus_capture import (
     ConsoleWakeWordCaptureConsent,
     ConsoleWakeWordCaptureReadiness,
@@ -102,6 +106,7 @@ from .wakeword_corpus_capture import (
     load_wakeword_capture_plan,
 )
 from .wakeword_evaluation import (
+    ResettableWakeWordDetector,
     evaluate_wakeword_corpus,
     load_wakeword_corpus_manifest,
 )
@@ -237,6 +242,25 @@ def build_parser() -> argparse.ArgumentParser:
     repcnn_evaluation.add_argument("model_path", type=Path)
     repcnn_evaluation.add_argument("model_sha256")
     repcnn_evaluation.add_argument("--threshold", type=float, default=0.7)
+
+    wakeword_calibration = subparsers.add_parser(
+        "calibrate-wakeword-threshold",
+        help="Select an openWakeWord threshold on a separate calibration corpus",
+    )
+    wakeword_calibration.add_argument("manifest", type=Path)
+    wakeword_calibration.add_argument("corpus_root", type=Path)
+    wakeword_calibration.add_argument("wakeword_manifest", type=Path)
+    wakeword_calibration.add_argument("--far-ceiling", type=float, default=0.05)
+
+    repcnn_calibration = subparsers.add_parser(
+        "calibrate-repcnn-wakeword-threshold",
+        help="Select a pinned RepCNN threshold on a separate calibration corpus",
+    )
+    repcnn_calibration.add_argument("manifest", type=Path)
+    repcnn_calibration.add_argument("corpus_root", type=Path)
+    repcnn_calibration.add_argument("model_path", type=Path)
+    repcnn_calibration.add_argument("model_sha256")
+    repcnn_calibration.add_argument("--far-ceiling", type=float, default=0.05)
 
     wakeword_capture = subparsers.add_parser(
         "capture-wakeword-corpus",
@@ -445,6 +469,35 @@ def main(arguments: Sequence[str] | None = None) -> int:
             )
         )
         return 0
+    if args.command in {
+        "calibrate-wakeword-threshold",
+        "calibrate-repcnn-wakeword-threshold",
+    }:
+        calibration_detector: ResettableWakeWordDetector = (
+            OpenWakeWordDetector.from_local_bundle(
+                load_wakeword_bundle(args.wakeword_manifest)
+            )
+            if args.command == "calibrate-wakeword-threshold"
+            else RepCnnWakeWordDetector.from_local_model(
+                args.model_path,
+                args.model_sha256,
+            )
+        )
+        calibration = calibrate_wakeword_threshold(
+            evaluate_wakeword_corpus(
+                load_wakeword_corpus_manifest(args.manifest),
+                args.corpus_root,
+                calibration_detector,
+                threshold=0.5,
+            ),
+            far_ceiling=args.far_ceiling,
+        )
+        print(calibration.model_dump_json(indent=2))
+        return (
+            0
+            if calibration.status is WakeWordCalibrationStatus.SELECTED
+            else 1
+        )
     if args.command == "smoke-system-info":
         return _smoke_system_info(args.audit_path)
     if args.command == "intent-scenarios":
