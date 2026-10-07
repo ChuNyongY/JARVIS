@@ -1484,3 +1484,9 @@ NIM 결과는 그대로 반영하지 않았다. 감사 과정에서 다음 문�
   ACL 실패와 비동의 경로를 회귀시험으로 고정했다.
 - 대화형 CLI는 매 실행 새 `동의 <무작위 토큰>`과 표본별 `준비`가 있어야만 마이크 source를 만든다.
   비대화형 안전 실행에서는 `CONSENT_NOT_GIVEN`으로 끝났고 출력 폴더나 원음은 생성되지 않았다.
+- 새 wheel은 129 entry, 304,014바이트, SHA-256
+  `e95fa41ad68692ab08f2543bf2195e8f86abeff9bd5fafb427973ee2db00731b`이며 격리 설치에서 수집 CLI와
+  공개 API import가 통과했다. one-folder manifest SHA-256은
+  `09e81ca7354eae542b13e82941f2b84686cbee2dac3134fa833d63014cd24f8b`, Setup SHA-256은
+  `d1aed47face805d6273223ac9a8888ee33413fd89bab4d77897a6284313c472d`다. 패키지/Setup 1,828개 파일의
+  실제 key exact match와 package `NIM.txt`는 0건이다. 세 실행 파일은 인증서가 없어 `NotSigned`다.

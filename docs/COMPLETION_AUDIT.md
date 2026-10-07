@@ -92,8 +92,8 @@
 - Ruff clean, mypy strict 125 source files.
 - Windows Hello helper build: warning 0, error 0.
 - `javis doctor`: SAPI와 optional pycaw를 포함한 15개 check PASS.
-- 새 wheel은 128 entry, 299,655바이트, SHA-256 `01924a9db4e2321cc6db9d1057b36f8421c5e55656b03d0d5854519ceaa40a48`이다. 빈 venv에 필수 dependency와 함께 설치해 RepCNN 평가 CLI와 adapter import를 재현했다.
-- current frozen one-folder는 1,826-entry manifest exact 검증을 통과했고 package manifest SHA-256은 `6aed3aba7ed881b5a7fa5715867a3df73a0bc99a577ad28a0948684f7181ccb0`다. 새 CLI, frozen doctor, Credential `PRESENT`, preflight 3/3과 13-capability service `CREATED`를 재현했다. 260,321,280-byte per-user Setup SHA-256은 `ff1d143f2c35d3158f361ff92c53ba46ae05ce4b3b33569999641848f41362ab`이며 sidecar와 일치한다. 새 Setup은 생성·감사했지만 실제 설치는 아직 실행하지 않았다. 이전 산출물의 최초 설치·manifest·preflight·autostart `ABSENT` 증거는 유지된다. console/tray/Setup은 Authenticode 미서명이므로 공개 배포 완료는 아니다.
+- 새 wheel은 129 entry, 304,014바이트, SHA-256 `e95fa41ad68692ab08f2543bf2195e8f86abeff9bd5fafb427973ee2db00731b`이다. 빈 venv에 필수 dependency와 함께 설치해 호출어 수집 CLI와 공개 API import를 재현했다.
+- current frozen one-folder는 1,826-entry manifest exact 검증을 통과했고 package manifest SHA-256은 `09e81ca7354eae542b13e82941f2b84686cbee2dac3134fa833d63014cd24f8b`다. frozen 수집 CLI 비동의 안전 종료, doctor, Credential `PRESENT`, preflight 3/3과 13-capability service `CREATED`를 재현했다. 260,349,952-byte per-user Setup SHA-256은 `d1aed47face805d6273223ac9a8888ee33413fd89bab4d77897a6284313c472d`이며 sidecar와 일치한다. 새 Setup은 생성·감사했지만 실제 설치는 아직 실행하지 않았다. 이전 산출물의 최초 설치·manifest·preflight·autostart `ABSENT` 증거는 유지된다. console/tray/Setup은 Authenticode 미서명이므로 공개 배포 완료는 아니다.
 - 실제 local voice composition smoke: openWakeWord와 faster-whisper bundle 초기화 및 `VoicePipeline` 조립 PASS, microphone 미개방.
 - synthetic closed-loop product composition: wake/VAD/STT, typed intent/plan, policy, executor, verifier, audit, 완료 event PASS; 외부효과 0.
 - 실제 product-host preflight: config, protected NIM secret, doctor 3/3 PASS, `ready=true`, exit 0. 마이크·모델 inference·앱·HUD는 열지 않음.
