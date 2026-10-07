@@ -88,7 +88,7 @@ from .user_validation import (
     UserValidationWorkflow,
 )
 from .verifier import PredicateVerifier
-from .voice_adapters import OpenWakeWordDetector
+from .voice_adapters import OpenWakeWordDetector, RepCnnWakeWordDetector
 from .wakeword_bundle import load_wakeword_bundle
 from .wakeword_evaluation import (
     evaluate_wakeword_corpus,
@@ -216,6 +216,16 @@ def build_parser() -> argparse.ArgumentParser:
     wakeword_evaluation.add_argument("corpus_root", type=Path)
     wakeword_evaluation.add_argument("wakeword_manifest", type=Path)
     wakeword_evaluation.add_argument("--threshold", type=float, default=0.5)
+
+    repcnn_evaluation = subparsers.add_parser(
+        "evaluate-repcnn-wakeword-corpus",
+        help="Evaluate a pinned local RepCNN wake-word model without a microphone",
+    )
+    repcnn_evaluation.add_argument("manifest", type=Path)
+    repcnn_evaluation.add_argument("corpus_root", type=Path)
+    repcnn_evaluation.add_argument("model_path", type=Path)
+    repcnn_evaluation.add_argument("model_sha256")
+    repcnn_evaluation.add_argument("--threshold", type=float, default=0.7)
 
     smoke = subparsers.add_parser(
         "smoke-system-info",
@@ -372,6 +382,19 @@ def main(arguments: Sequence[str] | None = None) -> int:
             load_wakeword_corpus_manifest(args.manifest),
             args.corpus_root,
             detector,
+            threshold=args.threshold,
+        )
+        print(wakeword_report.model_dump_json(indent=2))
+        return 0
+    if args.command == "evaluate-repcnn-wakeword-corpus":
+        repcnn_detector = RepCnnWakeWordDetector.from_local_model(
+            args.model_path,
+            args.model_sha256,
+        )
+        wakeword_report = evaluate_wakeword_corpus(
+            load_wakeword_corpus_manifest(args.manifest),
+            args.corpus_root,
+            repcnn_detector,
             threshold=args.threshold,
         )
         print(wakeword_report.model_dump_json(indent=2))

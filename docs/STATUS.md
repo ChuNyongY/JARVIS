@@ -446,4 +446,10 @@ recovery는 파일을 이동하거나 삭제하지 않고, 관찰된 상태에 �
   않았다. 고정 SHA-256·크기·입출력 검증, 3초 ring buffer, 400 ms hop과 reset을 갖춘 실험용
   `RepCnnWakeWordDetector`를 추가했다. 공개 예제 무음 smoke는 점수 `0.624035120`을 반환했으므로
   0.5 하한만으로 모델을 채택할 수 없고 실제 동의 corpus의 모델별 FAR/FRR 보정이 필요하다.
-- 이 단계의 전체 회귀는 792 passed, 3 skipped, Ruff clean, mypy strict 124 source files다.
+- 별도 `evaluate-repcnn-wakeword-corpus` CLI도 추가해 모델 경로와 64자리 SHA-256을 명시한 경우에만
+  후보 ONNX를 같은 FAR/FRR 하네스로 평가할 수 있다. 제품 기본 모델은 바뀌지 않았다.
+- 합성 3초 무음 목표 표시·비호출어 표본 각 1개와 공개 예제 모델로 CLI 전체 경로를 실행했다.
+  임계값 0.7에서 inference failure 0, FAR 0.0, FRR 1.0이 나왔으며 두 표본의 최대 점수는
+  `0.624035120`이었다. 이는
+  연결 검증 결과이고 음성이 없는 양성 표본이므로 성능 자료로 사용하지 않는다.
+- 이 단계의 전체 회귀는 793 passed, 3 skipped, Ruff clean, mypy strict 124 source files다.

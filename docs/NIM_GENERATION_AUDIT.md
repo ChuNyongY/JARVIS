@@ -1443,4 +1443,10 @@ NIM 결과는 그대로 반영하지 않았다. 감사 과정에서 다음 문�
   검증한 뒤 그 동일 byte를 CPU ONNX Runtime에 전달하도록 구현했다. 3초 ring buffer, 400 ms hop,
   strict I/O metadata, invalid score fail-closed와 reset 회귀시험을 추가했다. 공개 모델은 임시 폴더에
   유지했으며 제품 기본 모델이나 배포 산출물에는 넣지 않았다.
-- 전체 회귀는 792 passed, 3 skipped, Ruff clean, mypy strict 124 source files다.
+- 별도 RepCNN 평가 CLI 초안의 첫 NIM 요청은 120초 read timeout으로 결과를 받지 못했다. 범위를 줄인
+  재요청은 응답했지만 evaluator 인자 순서를 뒤집고 존재하지 않는 `yourpkg` import와 일반
+  `json.dumps`를 사용했다. 명령·인자 구조만 채택하고 실제 `javis_core` 호출 계약과 Pydantic 보고서
+  직렬화에 맞춰 수정했다.
+- 합성 무음 corpus와 공개 예제 모델로 새 CLI를 실제 실행해 inference failure 없이 typed FAR/FRR
+  보고서가 생성되는 것을 확인했다. 제품 기본 설정·모델·사용자 음성은 사용하지 않았다. 전체 회귀는
+  793 passed, 3 skipped, Ruff clean, mypy strict 124 source files다.

@@ -75,8 +75,22 @@ prediction buffer를 `reset()`해 이전 음성이 다음 표본에 섞이지 �
 `RepCnnWakeWordDetector`는 `wakeword-forge` 계열 ONNX를 비교하기 위한 실험 어댑터다. 16 kHz
 mono PCM의 최근 48,000표본(3초)을 보관하고 창이 찬 직후 한 번, 그 뒤 6,400표본(400 ms)마다
 추론한다. 모델은 네트워크에서 받지 않으며 호출자가 고정한 SHA-256, 16 MiB 크기 상한,
-`float32[batch,time] -> float32[batch]` 계약을 모두 통과해야 한다. 현재 제품 기본 호출어 경로나
-CLI에는 연결하지 않았으며, Python 평가 API에 주입해 후보 모델을 격리 비교하는 용도다.
+`float32[batch,time] -> float32[batch]` 계약을 모두 통과해야 한다. 제품 기본 호출어 경로에는
+연결하지 않았고 다음 별도 평가 명령으로만 후보를 격리 비교한다. SHA-256은 64자리 소문자로
+직접 제공해야 하며 모델별 threshold는 평가 전에 고정한다.
+
+```powershell
+python -m javis_core.cli evaluate-repcnn-wakeword-corpus `
+  C:\absolute\wake-corpus\manifest.json `
+  C:\absolute\wake-corpus `
+  C:\absolute\model\jarvis.onnx `
+  <64자리-model-sha256> `
+  --threshold 0.7
+```
+
+합성 무음 양성·비호출어 표본 각 하나로 이 명령의 파일 검증, 모델 무결성 검사, 추론과 보고서 생성을
+끝까지 확인했다. 임계값 0.7에서 FAR 0.0, FRR 1.0이었지만 호출어가 없는 합성 양성 표본이므로 이
+수치는 모델 품질이나 한국어 성능의 근거가 아니다.
 
 ## Wake-word model bundle
 
