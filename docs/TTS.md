@@ -1,5 +1,8 @@
 # 로컬 TTS 경계
 
+현재 Heami 품질 평가와 Piper·Kokoro·Supertonic 3 비교, 격리 CPU 측정 및 채택 기준은
+[한국어 로컬 TTS 후보 감사](TTS_CANDIDATE_AUDIT.md)에 있다.
+
 JAVIS의 현재 TTS 구현은 Windows SAPI를 별도 Python worker process에서 호출한다. 텍스트는
 네트워크나 NIM으로 보내지 않으며, worker에는 `speak` 또는 `render_wav`의 strict JSON 요청만
 전달한다. 이 모듈은 응답 문장 생성기가 아니라 이미 확정된 짧은 문장을 로컬 음성으로 출력하는

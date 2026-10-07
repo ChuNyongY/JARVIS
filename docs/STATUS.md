@@ -241,7 +241,7 @@ Chrome 자동 업데이트로 발생한 등록 해시 drift를 수정했고, 최
 
 - 사용자 동의가 필요한 실제 마이크 녹음 smoke test와 한국어 음성 데이터 평가
 - 상시 캡처 composition의 실제 마이크 장시간 운용과 실제 STOP latency 측정
-- 한국어 TTS 발음 자연스러움과 사용자 참여형 실제 스피커 재생 검증
+- 한국어 TTS 익명 후보의 사용자 자연스러움·명료도 평가와 채택 후보의 실제 스피커 재검증
 - Windows Hello helper의 별도 배포용 코드 서명
 - 사용자 앱 화면 smoke, 학습 기반 local grounder와 앱별 profile을 갖춘 선택적 Vision grounding
 - Setup EXE의 배포용 Authenticode 코드 서명과 실제 설치·복구·제거 사용자 smoke
@@ -450,6 +450,10 @@ recovery는 파일을 이동하거나 삭제하지 않고, 관찰된 상태에 �
 
 - 고정 한국어 TTS 재생, 사용자 품질 평가 3/5, Windows Hello 실제 인증은 PASS했다. 사용자는 TTS가
   번역기처럼 들려 후속 품질 개선이 필요하다고 평가했다.
+- 설치된 SAPI/OneCore 한국어 음성은 Heami 하나뿐임을 확인했다. Kokoro는 한국어 미지원, Piper
+  한국어 모델은 비상업 데이터 라이선스로 보류했다. Supertonic 3를 제품 밖에서 CPU 실행해 10화자
+  WAV를 생성했고 RTF 0.101~0.123을 확인했지만 자연스러움 증거는 아니므로 기본 TTS를 바꾸지 않았다.
+  Heami를 포함한 익명 A~K 청취 세트와 hash manifest를 만들었으며 사용자 평가는 아직 없다.
 - 마이크 probe는 28개 endpoint, 입력 장치 16개, 16 kHz mono 호환 장치 9개와 호환 기본 입력을
   확인했다.
 - 두 번의 동의 기반 마이크 시험은 실제 frame과 speech energy를 확인했지만, 공식 영어

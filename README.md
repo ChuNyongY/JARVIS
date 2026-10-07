@@ -185,6 +185,8 @@ python tools/build_windows_installer.py
 NIM 의도 제안과 로컬 실행 결정의 분리는 [Intent classifier 문서](docs/INTENT_CLASSIFIER.md)에 있다.
 음성 명령의 계획 전 연결과 STOP token 계약은 [음성 명령 문서](docs/VOICE_COMMAND.md)에 있다.
 로컬 Windows SAPI 출력과 WAV 검증 경계는 [TTS 문서](docs/TTS.md)에 있다.
+한국어 TTS 품질 개선 후보와 블라인드 청취 기준은
+[한국어 로컬 TTS 후보 감사](docs/TTS_CANDIDATE_AUDIT.md)에 있다.
 단일 음성 작업의 composition 계약은 [Agent session 문서](docs/AGENT_SESSION.md)에 있다.
 상시 캡처·비동기 계획/실행·STOP 계약은 [상시 런타임 문서](docs/ALWAYS_ON_RUNTIME.md)에 있다.
 Vision fallback의 비활성 기본값과 실행 안전조건은 [Vision 문서](docs/VISION.md)에 있다.

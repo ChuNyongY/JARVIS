@@ -1464,3 +1464,7 @@ NIM 결과는 그대로 반영하지 않았다. 감사 과정에서 다음 문�
   `6aed3aba7ed881b5a7fa5715867a3df73a0bc99a577ad28a0948684f7181ccb0`, Setup은 260,321,280바이트,
   SHA-256 `ff1d143f2c35d3158f361ff92c53ba46ae05ce4b3b33569999641848f41362ab`이다. 실제 key·`NIM.txt`·공개
   후보 ONNX는 package/Setup에서 0건이고, manifest/Setup hash PASS와 세 signature FAIL을 확인했다.
+- NIM에 Heami·Kokoro·Piper·Supertonic 3의 확인 사실과 격리 CPU 측정값을 주고 TTS 후보 감사 초안을
+  요청했다. 블라인드 청취 뒤 채택 결론은 사용했지만 초안이 SHA-256 중간에 공백을 넣었고 Heami
+  3/5만으로 대체 필요성이 확정됐다고 표현했으며 출처를 자리표시자로 남겨 그대로 쓰지 않았다.
+  Codex가 정확한 해시·공식 출처·라이선스 경계와 품질 비주장을 반영해 별도 감사 문서로 작성했다.
