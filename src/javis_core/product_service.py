@@ -28,6 +28,7 @@ from .product_host import (
 )
 from .product_policy import build_windows_policy_context_provider
 from .product_windows import build_windows_product_capabilities
+from .skill_runtime import LocalSkillCatalog
 from .windows_hello import load_windows_hello_verifier
 
 
@@ -36,6 +37,7 @@ class WindowsProductService:
     configuration: LoadedProductHostConfig
     preflight: ProductPreflightReport
     capabilities: ProductCapabilityStack
+    skills: LocalSkillCatalog
     voice: ProductVoiceStack
     language: ProductLanguageStack
     runtime: ProductRuntimeStack
@@ -89,14 +91,22 @@ def _build_windows_product_service(
     configuration = load_product_host_config(config_path, root)
     api_key = secret_loader()
     capabilities = build_windows_product_capabilities(configuration, root)
+    state_directory = root / "state"
+    if state_directory.is_symlink():
+        raise ProductHostError("product state directory must not be a symlink")
+    state_directory.mkdir(exist_ok=True)
+    if not state_directory.is_dir():
+        raise ProductHostError("product state directory is unavailable")
+    skills = LocalSkillCatalog(state_directory / "skills.sqlite3", capabilities.registry)
     language = build_product_language_stack(
         configuration,
         api_key,
         registry=capabilities.registry,
+        skill_catalog=skills,
     )
     voice = build_product_voice_stack(configuration)
     audit = JsonlAuditSink(
-        root / "state" / "audit.jsonl",
+        state_directory / "audit.jsonl",
         AuditRetentionPolicy(),
     )
     approval_presenter = LocalApprovalPresenter(TkApprovalDialog())
@@ -130,6 +140,7 @@ def _build_windows_product_service(
         configuration=configuration,
         preflight=preflight,
         capabilities=capabilities,
+        skills=skills,
         voice=voice,
         language=language,
         runtime=runtime,

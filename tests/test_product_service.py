@@ -217,3 +217,4 @@ def test_service_wires_privacy_context_and_personal_memory_policy(
     assert runtime_kwargs["policy_context_provider"] is policy_provider
     assert runtime_kwargs["planner_context_provider"] is planner_provider
     assert service.lifecycle is lifecycle
+    assert service.skills.search("아무 스킬") == ()
