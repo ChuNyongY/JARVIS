@@ -62,6 +62,31 @@ def test_credential_product_commands_do_not_accept_a_secret_path() -> None:
         assert not hasattr(parsed, "nim_secret")
 
 
+def test_skill_lifecycle_commands_create_approve_search_and_revise(
+    tmp_path: Path,
+    capsys: CaptureFixture[str],
+) -> None:
+    catalog = (tmp_path / "skills.sqlite3").resolve()
+    create = (
+        "skill-create", str(catalog), "volume-control", "볼륨 조절", "볼륨을 안전하게 조절한다.",
+        "--trigger", "볼륨", "--step", "현재 값을 읽는다.", "--capability", "audio.volume.read",
+    )
+    assert main(create) == 0
+    draft = json.loads(capsys.readouterr().out)
+    skill_id = draft["skill_id"]
+    assert main(("skill-approve", str(catalog), skill_id)) == 0
+    capsys.readouterr()
+    assert main(("skill-search", str(catalog), "볼륨")) == 0
+    assert json.loads(capsys.readouterr().out)["matches"][0]["skill_id"] == skill_id
+    revise = (
+        "skill-revise", str(catalog), skill_id, "volume-control", "볼륨 조절", "재확인한다.",
+        "--trigger", "소리", "--step", "현재 값을 읽는다.", "--capability", "audio.volume.read",
+    )
+    assert main(revise) == 0
+    revision = json.loads(capsys.readouterr().out)
+    assert revision["status"] == "DRAFT"
+
+
 def test_capture_wakeword_command_does_not_create_source_without_consent(
     tmp_path: Path,
     capsys: CaptureFixture[str],

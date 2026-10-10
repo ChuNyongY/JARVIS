@@ -7,6 +7,7 @@ import secrets
 import sys
 from collections.abc import Sequence
 from pathlib import Path
+from uuid import UUID
 
 from pydantic import SecretStr
 
@@ -73,6 +74,7 @@ from .safe_evaluation import SafeIntegratedEvaluationRunner
 from .scenario_capabilities import audit_scenario_capabilities
 from .scenarios import load_intent_scenarios, run_intent_scenarios
 from .secret_provisioning import provision_nim_secret
+from .skill_runtime import LocalSkillCatalog, SkillOutcome, SkillProposal
 from .snapshot_batch import (
     SNAPSHOT_SCENARIO_IDS,
     HmacSha256SnapshotVerifier,
@@ -284,6 +286,54 @@ def build_parser() -> argparse.ArgumentParser:
         help="Run a read-only system-info action through the full safety loop",
     )
     smoke.add_argument("--audit-path", type=Path)
+
+    skill_create = subparsers.add_parser(
+        "skill-create",
+        help="Create a local skill draft; drafts cannot be used until approved",
+    )
+    skill_create.add_argument("catalog", type=Path)
+    skill_create.add_argument("key")
+    skill_create.add_argument("title")
+    skill_create.add_argument("description")
+    skill_create.add_argument("--trigger", action="append", required=True)
+    skill_create.add_argument("--step", action="append", required=True)
+    skill_create.add_argument("--capability", action="append", required=True)
+
+    skill_approve = subparsers.add_parser(
+        "skill-approve",
+        help="Promote one local skill draft to a runnable verified skill",
+    )
+    skill_approve.add_argument("catalog", type=Path)
+    skill_approve.add_argument("skill_id")
+
+    skill_search = subparsers.add_parser(
+        "skill-search",
+        help="Search verified local skills for a user request",
+    )
+    skill_search.add_argument("catalog", type=Path)
+    skill_search.add_argument("query")
+
+    skill_revise = subparsers.add_parser(
+        "skill-revise",
+        help="Create a new draft version of a verified skill",
+    )
+    skill_revise.add_argument("catalog", type=Path)
+    skill_revise.add_argument("skill_id")
+    skill_revise.add_argument("key")
+    skill_revise.add_argument("title")
+    skill_revise.add_argument("description")
+    skill_revise.add_argument("--trigger", action="append", required=True)
+    skill_revise.add_argument("--step", action="append", required=True)
+    skill_revise.add_argument("--capability", action="append", required=True)
+
+    skill_use = subparsers.add_parser(
+        "skill-record-use",
+        help="Record an independently verified result for a skill version",
+    )
+    skill_use.add_argument("catalog", type=Path)
+    skill_use.add_argument("skill_id")
+    skill_use.add_argument("outcome", choices=[item.value for item in SkillOutcome])
+    skill_use.add_argument("detail_code")
 
     validate_apps = subparsers.add_parser(
         "validate-app-registry",
@@ -522,6 +572,42 @@ def main(arguments: Sequence[str] | None = None) -> int:
         )
     if args.command == "smoke-system-info":
         return _smoke_system_info(args.audit_path)
+    if args.command == "skill-create":
+        catalog = _skill_catalog(args.catalog)
+        record = catalog.propose(_skill_proposal(args))
+        print(record.model_dump_json(indent=2))
+        return 0
+    if args.command == "skill-approve":
+        record = _skill_catalog(args.catalog).approve(UUID(args.skill_id))
+        print(record.model_dump_json(indent=2))
+        return 0
+    if args.command == "skill-search":
+        records = _skill_catalog(args.catalog).search(args.query)
+        print(
+            json.dumps(
+                {
+                    "query": args.query,
+                    "matches": [item.model_dump(mode="json") for item in records],
+                },
+                ensure_ascii=False,
+                indent=2,
+            )
+        )
+        return 0
+    if args.command == "skill-revise":
+        catalog = _skill_catalog(args.catalog)
+        record = catalog.propose_revision(UUID(args.skill_id), _skill_proposal(args))
+        print(record.model_dump_json(indent=2))
+        return 0
+    if args.command == "skill-record-use":
+        catalog = _skill_catalog(args.catalog)
+        use_record = catalog.record_use(
+            catalog.require(UUID(args.skill_id)),
+            SkillOutcome(args.outcome),
+            args.detail_code,
+        )
+        print(use_record.model_dump_json(indent=2))
+        return 0
     if args.command == "intent-scenarios":
         scenario_report = run_intent_scenarios(load_intent_scenarios(args.path))
         print(scenario_report.model_dump_json(indent=2))
@@ -1218,6 +1304,25 @@ def _resolve_cli_path(path: Path, *, directory: bool) -> Path:
     if not directory and not resolved.is_file():
         raise ValueError("product input must be a file")
     return resolved
+
+
+def _skill_catalog(path: Path) -> LocalSkillCatalog:
+    if not path.is_absolute() or path.is_symlink() or not path.parent.is_dir():
+        raise ValueError(
+            "skill catalog must be an absolute non-symlink path in an existing directory"
+        )
+    return LocalSkillCatalog(path.resolve(strict=False), default_registry())
+
+
+def _skill_proposal(args: argparse.Namespace) -> SkillProposal:
+    return SkillProposal(
+        key=args.key,
+        title=args.title,
+        description=args.description,
+        triggers=tuple(args.trigger),
+        procedure=tuple(args.step),
+        allowed_capabilities=tuple(args.capability),
+    )
 
 
 def _smoke_system_info(audit_path: Path | None) -> int:
