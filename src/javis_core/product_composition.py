@@ -23,6 +23,7 @@ from .planner import NimChatTransport, TypedPlanner
 from .policy import PolicyEngine
 from .product_host import LoadedProductHostConfig
 from .registry import CapabilityRegistry, default_registry
+from .skill_runtime import LocalSkillCatalog, SkillAwarePlanner
 from .stt_bundle import LoadedSttBundle, load_stt_bundle
 from .verifier import Verifier
 from .verifier_router import CapabilityVerifierRouter
@@ -33,7 +34,7 @@ from .voice_adapters import (
     PcmEnergyVad,
     SoundDeviceFrameSource,
 )
-from .voice_command import VoiceCommandCoordinator
+from .voice_command import CommandPlanner, VoiceCommandCoordinator
 from .voice_feedback import VoiceFeedbackPresenter
 from .wakeword_bundle import LoadedWakeWordBundle, load_wakeword_bundle
 
@@ -80,7 +81,7 @@ class ProductVoiceStack:
 @dataclass(frozen=True)
 class ProductLanguageStack:
     classifier: TypedIntentClassifier
-    planner: TypedPlanner
+    planner: CommandPlanner
     registry: CapabilityRegistry
 
 
@@ -149,17 +150,21 @@ def build_product_language_stack(
     *,
     registry: CapabilityRegistry | None = None,
     transport_factory: LanguageTransportFactory = _nim_transport_factory,
+    skill_catalog: LocalSkillCatalog | None = None,
 ) -> ProductLanguageStack:
     """Build typed NIM proposal components without making a network request."""
     selected_registry = registry or default_registry()
     classifier_transport = transport_factory(api_key, configuration.settings.nim_model)
     planner_transport = transport_factory(api_key, configuration.settings.nim_model)
+    typed_planner = TypedPlanner(
+        planner_transport,
+        selected_registry,
+    )
     return ProductLanguageStack(
         classifier=TypedIntentClassifier(classifier_transport),
-        planner=TypedPlanner(
-            planner_transport,
-            selected_registry,
-        ),
+        planner=SkillAwarePlanner(typed_planner, skill_catalog)
+        if skill_catalog is not None
+        else typed_planner,
         registry=selected_registry,
     )
 

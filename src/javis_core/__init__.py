@@ -339,6 +339,16 @@ from .pdf_open import (
     SubprocessPdfLauncher,
 )
 from .planner import NimChatTransport, PlannerError, TypedPlanner
+from .skill_runtime import (
+    LocalSkillCatalog,
+    SkillAwarePlanner,
+    SkillOutcome,
+    SkillProposal,
+    SkillRecord,
+    SkillRuntimeError,
+    SkillStatus,
+    SkillUseRecord,
+)
 from .policy import PolicyEngine
 from .policy_context import gate_scoped_policy_context_provider
 from .powershell_readonly import PowerShellReadOnlyExecutor
@@ -1098,6 +1108,14 @@ __all__ = [
     "TtsWorkerResponse",
     "TtsWorkerRunner",
     "TypedPlanner",
+    "LocalSkillCatalog",
+    "SkillAwarePlanner",
+    "SkillOutcome",
+    "SkillProposal",
+    "SkillRecord",
+    "SkillRuntimeError",
+    "SkillStatus",
+    "SkillUseRecord",
     "TkStatusView",
     "TypedIntentClassifier",
     "PywinautoUiaBackend",

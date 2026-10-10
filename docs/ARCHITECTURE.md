@@ -6,7 +6,8 @@
 flowchart LR
   U[사용자 음성] --> G[Intent Gate]
   X[웹·PDF·메일\n비신뢰 데이터] --> P[Planner]
-  G --> P
+  G --> K[Verified Skill Retrieval]
+  K --> P
   P -->|Typed Plan| C[Policy Engine]
   R[(Capability Registry)] --> C
   C -->|GREEN| E[Execution Broker]
@@ -26,14 +27,16 @@ Planner 출력과 화면·문서 내용은 신뢰하지 않는다. capability re
 
 1. typed classifier가 evidence를 제안하고 Intent Gate가 addressedness, command intent,
    target confidence의 최솟값으로 route를 결정한다. exact STOP과 untrusted content는 모델을 우회한다.
-2. Planner는 등록된 capability ID와 argument choice만 참조하는 `Plan`을 제안하며 사용자 goal은
+2. 스킬 런타임은 VERIFIED 상태의 재사용 절차만 검색한다. 선택된 스킬은 허용 capability 목록을
+   좁히며, DRAFT 스킬은 실행에 사용되지 않는다.
+3. Planner는 선택된 스킬과 등록된 capability ID·argument choice만 참조하는 `Plan`을 제안하며 사용자 goal은
    모델 출력이 아니라 원래 입력에 다시 결합된다.
-3. 스키마 검증 실패 또는 unknown capability는 deny한다.
-4. Policy Engine은 capability risk floor와 현재 문맥을 합성한다.
-5. GREEN은 즉시 실행 후보, YELLOW는 preview/queue, RED는 강한 승인 대상으로 보낸다.
-6. Execution Broker는 action 직전에 정책과 승인을 다시 검사한다.
-7. Verifier는 각 postcondition을 실제 상태에서 평가한다.
-8. 실패는 제한된 retry/replan 또는 abort로만 전이한다.
+4. 스키마 검증 실패, unknown capability, 스킬 허용 목록 밖 capability는 deny한다.
+5. Policy Engine은 capability risk floor와 현재 문맥을 합성한다.
+6. GREEN은 즉시 실행 후보, YELLOW는 preview/queue, RED는 강한 승인 대상으로 보낸다.
+7. Execution Broker는 action 직전에 정책과 승인을 다시 검사한다.
+8. Verifier는 각 postcondition을 실제 상태에서 평가한다.
+9. 실패는 제한된 retry/replan 또는 abort로만 전이한다.
 
 ## 정책 순서
 
