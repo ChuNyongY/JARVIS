@@ -1,19 +1,28 @@
 # JAVIS-PC Agent
 
-> 현재 상태: **안전 제어 core 및 제한된 Windows adapter prototype**. 정책·승인·검증 폐루프,
-> read-only adapter, 등록 앱 실행, journal 기반 파일 이동, 휴지통 이동, 제한된 Notepad 변경이
-> 구현됐다. 상시 캡처 composition은 연결했지만 실제 마이크·장시간 운용 검증과 범용 변경 작업은
-> 완료하지 않았다.
+> 현재 상태: **스킬 중심 Windows 에이전트 및 제한된 Windows adapter prototype**. 로컬 스킬
+> 카탈로그의 생성·승인·검색·사용 기록·개정 구조와, 스킬 실행을 제한하는 정책·승인·검증 폐루프가
+> 구현됐다. 음성 UI에서 새 스킬을 대화로 만드는 흐름, 실제 마이크·장시간 운용 검증, 범용 변경 작업은
+> 아직 완료하지 않았다.
 
-JAVIS-PC Agent는 한국어 음성 명령을 받아 Windows 작업을 수행하기 전에 사용자 의도, 작업 위험도, 실행 대상을 독립적으로 검사하고 실행 후 실제 상태를 검증하는 안전 실행 제어 연구 시스템이다.
+JAVIS-PC Agent는 한국어 음성·텍스트 요청을 받아 사용자의 반복 Windows 작업을 **스킬로 만들고,
+찾고, 사용하며, 실행 결과를 기록해 사용자 승인으로 새 버전으로 갱신하는** 로컬 Windows 에이전트다. 안전 정책·승인·검증은
+프로젝트의 목적 자체가 아니라, 스킬이 실제 PC에서 행동할 때 잘못된 권한이나 대상을 사용하지 못하게 하는
+실행 경계다.
 
 ## 무엇이 다른가
 
-공개된 JARVIS 계열 프로젝트에는 이미 웨이크워드, 로컬 STT/TTS, LLM 도구 호출, 메모리, 앱 실행, PowerShell, 화면 인식 등이 존재한다. JAVIS는 이를 새로움으로 주장하지 않는다. 연구 초점은 LLM과 운영체제 사이의 **검사 가능한 control plane**이다.
+공개된 JARVIS 계열 프로젝트에는 이미 웨이크워드, 로컬 STT/TTS, LLM 도구 호출, 메모리, 앱 실행,
+PowerShell, 화면 인식 등이 존재한다. JAVIS의 중심은 모델이 매번 즉흥적으로 도구를 고르는 방식 대신,
+사용자별 반복 업무를 버전 있는 **검증된 스킬**로 축적하는 것이다. 연구 초점은 같은 모델과 같은 Windows
+도구에서도 스킬 검색·사용·갱신 구조가 작업 재현성과 성공률을 높이는지, 그리고 그 실행을 안전 경계가
+어떻게 제한하는지다.
 
 ```text
 Wake/VAD/STT
   -> Addressedness + Intent Gate
+  -> Verified Skill Retrieval
+  -> Skill procedure + capability allowlist
   -> Typed Plan
   -> Deterministic Capability Policy
   -> GREEN | YELLOW | RED | DENY
@@ -23,17 +32,27 @@ Wake/VAD/STT
   -> Success | Bounded Retry/Replan | Abort
 ```
 
-핵심 차별점은 다음과 같다.
+스킬 중심 핵심 기능은 다음과 같다.
+
+- 사용자는 반복 작업을 로컬 스킬 초안으로 만들고, 승인된 스킬만 실행에 사용한다.
+- 스킬은 제목·호출 문구·절차·허용 capability·버전을 가지며, 실행 결과를 버전과 함께 기록한다.
+- 스킬 변경은 기존 절차를 덮어쓰지 않고 새 DRAFT 버전으로 생성되며, 사용자 승인 뒤에만 VERIFIED가 된다.
+- Planner는 선택된 스킬의 capability allowlist 밖의 작업을 계획할 수 없다.
+- 스킬은 새 권한이나 임의 shell 명령을 만들지 못한다. 실제 실행 권한은 registry와 정책이 계속 통제한다.
+
+안전 실행 경계는 다음을 보장한다.
 
 - LLM은 typed plan을 제안하지만 실행 권한을 결정하지 않는다.
-- capability의 위험 하한은 결정론적이며 문맥은 위험도를 낮출 수 없다.
-- 정책은 계획 시점뿐 아니라 실제 action 실행 직전에 다시 평가한다.
-- RED 승인은 task, action, capability, 인자 해시, 대상, 위험도, 유효기간에 묶인다.
+- 승인 후 대상·인자·위험도가 바뀌거나 토큰이 재사용되면 실행을 거부한다.
 - 실행 성공은 도구의 응답이 아니라 실제 Windows postcondition으로 판단한다.
-- 웹·PDF·이메일 등 신뢰하지 않는 콘텐츠는 새 capability나 권한을 부여할 수 없다.
+- 웹·PDF·이메일 등 신뢰하지 않는 콘텐츠는 스킬, capability, 권한을 추가할 수 없다.
 
 ## 현재 구현된 범위
 
+- SQLite 기반 로컬 스킬 카탈로그: DRAFT → VERIFIED → RETIRED lifecycle
+- `skill-create`, `skill-approve`, `skill-search`, `skill-revise`, `skill-record-use` CLI
+- 선택된 VERIFIED 스킬의 capability allowlist에 Plan을 결합하는 `SkillAwarePlanner`
+- 제품 서비스의 `state/skills.sqlite3` 스킬 카탈로그와 스킬 우선 Planner 연결
 - Pydantic 기반 Plan, Action, Capability, Policy, Approval, Verification 계약
 - 불변 capability registry와 기본 R0~R4 위험 하한
 - GREEN/YELLOW/RED/DENY 정책 엔진
@@ -96,14 +115,14 @@ Wake/VAD/STT
 wake word/STT 정확도, 평점 3/5인 TTS 말투 개선, 추가 앱별 변경 adapter, Vision fallback,
 snapshot VM 위험 작업, 고급 procedural memory다.
 
-## 안전 불변식
+## 스킬 및 안전 불변식
 
-1. 등록되지 않은 capability는 항상 거부한다.
-2. 문맥 정보는 capability 위험 하한을 낮출 수 없다.
-3. RED 작업은 자동 승인하지 않는다.
-4. 승인 후 대상이나 인자가 바뀌면 토큰을 거부한다.
-5. 승인 토큰은 짧게 만료되며 기본적으로 한 번만 사용할 수 있다.
-6. prompt injection이 의심되면 action을 실행하지 않는다.
+1. DRAFT 스킬은 검색·실행되지 않는다.
+2. 스킬은 등록되지 않은 capability와 임의 shell 명령을 추가할 수 없다.
+3. 스킬 절차가 바뀌면 새 초안 버전을 만들고, 기존 VERIFIED 버전을 몰래 바꾸지 않는다.
+4. 스킬이 선택돼도 정책은 실행 직전 다시 평가한다.
+5. RED 작업은 자동 승인하지 않는다.
+6. 승인 후 대상이나 인자가 바뀌면 토큰을 거부한다.
 7. verifier 실패 시 다음 action으로 진행하지 않는다.
 8. 전역 STOP은 LLM을 우회해 Orchestrator와 공유하는 one-way cancellation token을 set한다.
 
@@ -120,15 +139,22 @@ snapshot VM 위험 작업, 고급 procedural memory다.
 Windows Update로 실행 파일 hash가 바뀌면 자동 우회하지 말고 새 파일의 서명과 publisher를
 검토한 뒤 registry를 명시적으로 갱신한다.
 
-비목표는 모든 Windows 앱 지원, 관리자 권한 상시 보유, 임의 셸 실행, 완전 자율 RED 실행, 범용 대화 비서와의 기능 경쟁이다. 클라우드 또는 로컬 LLM 선택은 구현 옵션이며 연구 기여가 아니다.
+비목표는 모든 Windows 앱 지원, 관리자 권한 상시 보유, 임의 셸 실행, 스킬의 무승인 자동 활성화,
+완전 자율 RED 실행, 범용 대화 비서와의 기능 경쟁이다. 클라우드 또는 로컬 LLM 선택은 구현 옵션이며
+연구 기여가 아니다.
 
 ## 연구 설계
 
 연구 질문은 다음과 같다.
 
-> 발화 대상성·작업 위험도·실행 결과 검증을 결합한 제어 계층이 단순 LLM 직접 실행보다 비의도 실행과 위험 실행을 줄이면서 작업 성공률과 사용자 편의성을 유지하는가?
+> 동일한 LLM과 Windows 도구에서, 반복 작업을 검증된 스킬로 생성·검색·사용·개정하는 구조가 매번
+> 즉흥적으로 계획하는 방식보다 작업 성공률·재현성·복구율을 높이는가? 또한 안전 실행 경계는 그 과정에서
+> 허용되지 않은 capability와 잘못된 대상 실행을 차단하는가?
 
-비교군은 B0(직접 실행), B1(모든 부작용 확인), P1(Intent+Risk), P2(전체 검증 루프)다. 측정 지표는 Unintended Execution Rate(UER), Unsafe Execution Rate, Severe Underclassification Rate, Task Success Rate, Recovery Rate, Verification Precision, Confirmation Burden, 단계별 latency다. 아직 실험 결과나 우월성을 주장하지 않는다.
+비교군은 H0(스킬 없이 직접 계획), H1(스킬 검색·허용 capability 결합), H2(H1 + 실행 결과 기록을
+바탕으로 사용자가 승인한 스킬 개정)로 둔다. 각 조건에 같은 안전 실행 경계를 적용해 Task Success Rate, Recovery Rate, skill reuse
+rate, plan 재사용성, latency, 모델 호출 수와 안전 차단 건수를 측정한다. 안전 경계 자체의 효과가 필요하면
+B0/B1/P1/P2 비교를 별도 보조 실험으로 둔다. 아직 실험 결과나 우월성을 주장하지 않는다.
 
 ## 개발 환경
 
@@ -213,3 +239,4 @@ Windows Settings allowlist와 검증 한계는 [Settings adapter 문서](docs/SE
 현재 완료 범위와 남은 작업은 [구현 상태](docs/STATUS.md), 위협과 잔여 위험은 [위협 모델](docs/THREAT_MODEL.md)에 정리한다.
 최신 공개 Windows JARVIS 계열과의 기능·안전성 차이는 [GitHub 비교 문서](docs/GITHUB_COMPARISON.md)에 있다.
 LLM 하네스·스킬의 역할, 성능 영향, 선행 연구와 쉬운 설명은 [하네스와 스킬 문서](docs/HARNESS_AND_SKILLS.md)에 있다.
+스킬 생성·검색·사용·개정의 실제 런타임 경계는 [스킬 런타임 문서](docs/SKILL_RUNTIME.md)에 있다.
